@@ -1,0 +1,37 @@
+name: "\U0001F64B New User Story"
+description: Suggest a new User Story for this project
+assignees:
+  - bankole2000
+title: "[User Story]: <Short Description>"
+labels: ["user story", "feature request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Summary
+        Provide a brief overview of the user story.
+  - type: input
+    id: user-story
+    attributes:
+      label: User Story
+      description: |
+        Format: As a <type of user>, I want <goal> so that <reason>.
+      placeholder: "As a user, I want to reset my password so that I can regain access to my account."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: |
+        List the conditions that must be met for this feature to be complete.
+      placeholder: |
+        - [ ] Users can see a "Forgot Password" link on the login page.
+        - [ ] Clicking the link sends a reset email.
+    validations:
+      required: true
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Include any other information, links, or context.

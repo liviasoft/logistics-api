@@ -1,0 +1,101 @@
+name: "\U0001F41E Bug report"
+description: Report an issue / bug with this project
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - bankole2000
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please provide a clear and concise description of what the bug is.
+      placeholder: Try to describe what the bug/issue is or what happened
+      value: "I did [x] and then [y] happened (instead of [z])"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce the bug
+      description: |
+        1. Click on ...
+        2. Check log
+    validations:
+      required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: "If possible, provide a reproduction using [a CodeSandbox](https://stackblitz.com/), screenshots, or [a screen recorder](https://screen-recorder.com/). A failing unit test is even better! Otherwise please provide as much information as possible to reproduce the problem."
+      placeholder: Reproduction
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What should normally happen when steps are taken
+      value: "What should normally happen when steps are taken"
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: 'A clear and concise description of what actually happens.'
+      placeholder: What actually happened when steps were taken instead of what should happen
+      value: "What actually happened when steps were taken instead of what should happen"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: bash
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System / Platform
+      description: What operating system were you running?
+      options:
+        - Windows
+        - Mac (iOS)
+        - Linux / Unix
+        - Android
+        - Chrome Book
+        - Other
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: (optional) What browsers / Platforms are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Mobile (Android)
+        - Mobile (iOS)
+        - Other (REST / GraphQL Client)
+  - type: textarea
+    id: other-info
+    attributes:
+      label: Additional information
+      description: Add any other context about the problem here.
+  
+  - type: markdown
+    attributes:
+      value: |
+        ## Before creating an issue make sure that:
+        - This hasn't been [reported before](https://github.com/Bankole2000/logistics-api/issues).
+        - The provided reproduction is a [minimal reproducible example](https://stackoverflow.com/help/minimal-reproducible-example) of the bug **with no external dependencies (e.g. vuetify)**
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      # description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

@@ -1,0 +1,70 @@
+name: "\U0001F680 New Feature Request"
+description: Request a new feature for this project
+labels: ['feature request']
+title: "[Feat]: <Short Description>"
+assignees:
+  - bankole2000
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in the project and taking the time to fill out this feature report!
+  - type: input
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the feature.
+      placeholder: "Example: As a [user role], I should be able to [complete action] so that I can [achieve outcome]"
+      value: "Example: As a [user role], I should be able to [complete action] so that I can [achieve outcome]"
+    validations:
+      required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: What problem is this solving
+      description: 'A clear and concise description of what the problem is. Ex. when using the function X we cannot do Y.'
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: 'A clear and concise description of what you want to happen with an API proposal when applicable'
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Scenario
+      description: Describe a scenario where this feature would be useful.
+      placeholder: Under what circumstances would this feature be useful
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered Ex. We could use [same company]'s way of doing this at https://company.com/path/to/sample-feature.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What would you consider to be completion for this feature?
+      placeholder: | 
+        - [ ] [User Role] can [Action] [Resource] 
+        - [ ] [User Role] can also [Action] [Resource] 
+        - [ ] [Other User Role] cannot [Action] [Resource] 
+        ...
+      value: | 
+        - [ ] [User Role] can [Action] [Resource] 
+        - [ ] [User Role] can also [Action] [Resource] 
+        - [ ] [Other User Role] cannot [Action] [Resource] 
+        ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Any Additional Context
+      description: Any other context or additional information.
+      placeholder: Any other context or additional information you wish to share about the proposed feature...
+      value: "Any other context or additional information you wish to share about the proposed feature..."
+  - type: markdown
+    attributes:
+      value: |
+        ## Before creating a feature request make sure that:
+        - This hasn't been [requested before](https://github.com/Bankole2000/logistics-api/issues).
