@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/Bankole2000/logistics-api/compare/v0.0.2...v0.0.3) (2025-01-19)
+
+
+### 📝 Documentation
+
+* configure repo templates ([046f5f5](https://github.com/Bankole2000/logistics-api/commits/046f5f57918976725975c5aa0b4d4794e0bd4901))
+
 ### 0.0.2 (2025-01-19)
 
 
