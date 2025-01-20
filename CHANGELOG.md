@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/Bankole2000/logistics-api/compare/v0.0.4...v0.0.5) (2025-01-20)
+
+
+### ♾️ Continuous Integration
+
+* **staging:** fix prerelease job glitch ([732e645](https://github.com/Bankole2000/logistics-api/commits/732e645c0d3e43b997c3c91656fbb62fb16745e3))
+* **staging:** fix workflow typos ([effe88a](https://github.com/Bankole2000/logistics-api/commits/effe88a2ad0387b5071097b7853e3c3d2ac22303))
+
 ### [0.0.4](https://github.com/Bankole2000/logistics-api/compare/v0.0.3...v0.0.4) (2025-01-20)
 
 
