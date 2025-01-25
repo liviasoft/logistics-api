@@ -1,9 +1,12 @@
 name: "\U0001F64B New User Story"
 description: Suggest a new User Story for this project
+title: "[User Story]: <Short Description>"
+labels: ["user story", "api"]
+type: Feature
+projects:
+  - 'liviasoft/2'
 assignees:
   - bankole2000
-title: "[User Story]: <Short Description>"
-labels: ["user story", "feature request", "enhancement"]
 body:
   - type: markdown
     attributes:
@@ -15,7 +18,7 @@ body:
     attributes:
       label: User Story
       description: |
-        Format: As a <type of user>, I want <goal> so that <reason>.
+        Format: As a \<type of user>, I want \<goal> so that \<reason>.
       placeholder: "As a user, I want to reset my password so that I can regain access to my account."
     validations:
       required: true

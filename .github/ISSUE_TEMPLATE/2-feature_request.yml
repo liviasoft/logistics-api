@@ -1,7 +1,10 @@
 name: "\U0001F680 New Feature Request"
 description: Request a new feature for this project
-labels: ['feature request']
 title: "[Feat]: <Short Description>"
+labels: ["feature request", "api"]
+type: Feature
+projects:
+  - 'liviasoft/2'
 assignees:
   - bankole2000
 body:
