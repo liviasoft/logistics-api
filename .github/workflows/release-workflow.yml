@@ -1,0 +1,303 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - '**' # Trigger on push to any branch
+  pull_request: # Trigger on pull request events [opened, reopened, or source branch updated]
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  sanity-check:
+    name: Sanity Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Linter
+      run: npm run lint
+
+    - name: Run Tests
+      run: npm test
+
+  get-current-branch:
+    name: Get Target Branch
+    needs: 
+      - sanity-check
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ env.current_branch }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        
+      - name: Get Current Branch
+        run : echo "current_branch=$(git branch --show-current)" >> $GITHUB_ENV
+      
+      - name: Display Current Branch
+        run: echo "Current Branch is ${{ env.current_branch }}"
+  
+  check-branch-rules:
+    if: github.event_name != 'push'
+    needs: 
+      - get-current-branch
+    name: Check Branch Rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Only allow staging or hotfix to main
+        if: github.base_ref == 'main' && github.event.head_commit.author
+        run: |
+          if [[ ${{ github.head_ref }} != staging ]] && ! [[ ${{ github.head_ref }} =~ ^hotfix/ ]]; 
+          then
+            echo "This PR is not allowed. Only PRs from staging or hotfix/* are allowed into main."
+            exit 1
+          fi
+      
+      - name: Only allow dev or hotfix to staging
+        if: github.base_ref == 'staging'
+        run: |
+          if [[ ${{ github.head_ref }} != dev ]] && ! [[ ${{ github.head_ref }} =~ ^hotfix/ ]]; 
+          then
+            echo "This PR is not allowed. Only PRs from dev or hotfix/* are allowed into staging."
+            exit 1
+          fi
+
+  check-push-rules:
+    name: Check Push Rules
+    if: github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Merge pull request') && !startsWith(github.event.head_commit.message, 'Merge branch')
+    runs-on: ubuntu-latest
+    needs:
+      - get-current-branch
+    steps:
+      - name: Checkout If Push allowed
+        if: contains('dev,staging,main', needs.get-current-branch.outputs.value)
+        run: |
+          echo "Pushing directly to this branch is not allowed"
+          exit 1
+          
+  build:
+    name: Build for target
+    if: contains('dev,staging,main', needs.get-current-branch.outputs.value)
+    needs: 
+      - get-current-branch
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Display Current Branch
+        run: echo "Current Branch is ${{ needs.get-current-branch.outputs.value }}"
+      
+      - name: Build for Dev
+        if: needs.get-current-branch.outputs.value == 'dev'
+        run: | 
+          echo "Building for ${{ needs.get-current-branch.outputs.value }}"
+          echo "Dev Build Steps would be here"
+      
+      - name: Build for staging
+        if: needs.get-current-branch.outputs.value == 'staging'
+        run: | 
+          echo "Building for ${{ needs.get-current-branch.outputs.value }}"
+          echo "Staging Build Steps would be here"
+      
+      - name: Build for production
+        if: needs.get-current-branch.outputs.value == 'main'
+        run: | 
+          echo "Building for ${{ needs.get-current-branch.outputs.value }}"
+          echo "Production Build Steps would be here"
+    
+  pre-release:
+    name: Push Prerelease
+    if: needs.get-current-branch.outputs.value == 'staging' && github.event_name == 'push'
+    needs: 
+      - build
+      - get-current-branch
+    runs-on: ubuntu-latest
+    outputs:
+      release-tag: ${{ env.AUTOMATIC_RELEASES_TAG }}
+    permissions:
+        contents: write    
+        actions: write   
+        checks: write
+        deployments: write
+        id-token: write
+        issues: write
+        discussions: write
+        packages: write
+        pages: write
+        pull-requests: write
+        repository-projects: write
+        security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+      
+      - name: Set Git config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+      - name: Update Version & changelog
+        run: npm run release -- --prerelease alpha
+
+      - name: Push changes and tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.STANDARD_VERSION_PAT }}  # Use GitHub token for release
+        run: |
+          echo ${{ github.event.head_commit.author.name }}
+          echo "Secret is ${{ env.GITHUB_TOKEN }}"
+          git remote set-url origin https://${{ env.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --follow-tags origin staging --force
+
+      - name: Get Latest Tag
+        id: latest-tag
+        run: echo "latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+
+      - name: Print Latest Tag
+        run: echo "The latest tag is ${{ env.latest_tag }}"
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: prerelease
+          prerelease: true
+          title: "Release ${{ env.latest_tag }}"
+
+  release:
+    name: Push Release
+    if: needs.get-current-branch.outputs.value == 'main' && github.event_name == 'push'
+    needs: 
+      - build
+      - get-current-branch
+    runs-on: ubuntu-latest
+    outputs:
+      release-tag: ${{ env.AUTOMATIC_RELEASES_TAG }}
+    permissions:
+      contents: write      
+      actions: write   
+      checks: write
+      deployments: write
+      id-token: write
+      issues: write
+      discussions: write
+      packages: write
+      pages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+
+    steps:
+      - name: Display Current Branch
+        run: echo "Current Branch from previous output is ${{ needs.get-current-branch.outputs.value }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+      
+      - name: Set Git config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+      - name: Update Version & changelog
+        run: npm run release --verbose
+
+      - name: Push changes and tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.STANDARD_VERSION_PAT }}  # Use GitHub token for release
+        run: |
+          echo ${{ github.event.head_commit.author }}
+          echo "Secret is ${{ env.GITHUB_TOKEN }}"
+          git remote set-url origin https://${{ env.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --follow-tags origin main --force
+
+      - name: Get Latest Tag
+        id: latest-tag
+        run: echo "latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+
+      - name: Print Latest Tag
+        run: echo "The latest tag is ${{ env.latest_tag }}"
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: latest
+          prerelease: false
+          title: "Release ${{ env.latest_tag }}"
+
+  deploy-staging:
+    name: Deploy to Staging
+    if: needs.pre-release.outputs.release-tag == 'prerelease'
+    needs: 
+      - pre-release
+    runs-on: ubuntu-latest
+
+    steps: 
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy Pre-Release
+        run: |
+          echo "Deploy to Staging environment"
+          echo "Staging deployment steps would be here"
+
+  deploy-prod:
+    name: Deploy to Production
+    if: needs.release.outputs.release-tag == 'latest'
+    needs: 
+      - release
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy Release
+        run: |
+          echo "Deploy to Production environment"
+          echo "Production deployment steps would be here"

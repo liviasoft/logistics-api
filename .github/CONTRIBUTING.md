@@ -80,7 +80,7 @@ Please review our [Code of Conduct](./CODE_OF_CONDUCT.md) before contributing. B
 
 ### Commit Message Guidelines
 
-This project uses [conventional commits]() and follows the [SemVer]() versioning conventions. Please follow these conventions for commit messages:
+This project uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and follows the [SemVer](https://semver.org/) versioning conventions. Please follow these conventions for commit messages:
 
 - Please avoid running `--no-verify` commits
 - Use the commit format

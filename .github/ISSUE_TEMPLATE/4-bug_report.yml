@@ -1,7 +1,10 @@
 name: "\U0001F41E Bug report"
 description: Report an issue / bug with this project
 title: "[Bug]: "
-labels: ["bug"]
+labels: ["bug", "api"]
+type: Bug
+projects:
+  - 'liviasoft/2'
 assignees:
   - bankole2000
 body:
@@ -27,7 +30,7 @@ body:
         2. Check log
     validations:
       required: true
-  - type: input
+  - type: textarea
     id: reproduction
     attributes:
       label: Reproduction
