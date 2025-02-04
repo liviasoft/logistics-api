@@ -12,3 +12,13 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model FeatureFlag {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  enabled     Boolean @default(false) // Global enable/disable
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  appId       String?
+}
