@@ -13,12 +13,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// enum AppScope {
+//   DEVELOPER_PLATFORM
+//   SUPPORT_PLATFORM
+//   CUSTOMER_APP
+//   OPERATIONS_APP
+// }
+
+// model DeveloperApp {
+//   id           String           @id @default(uuid())
+//   name         String
+//   clientId     String           @unique
+//   apiKey       String
+//   createdAt    DateTime         @default(now())
+//   updatedAt    DateTime         @updatedAt
+//   featureFlags AppFeatureFlag[]
+// }
+
 model FeatureFlag {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String           @id @default(uuid())
+  name        String           @unique
   description String?
-  enabled     Boolean @default(false) // Global enable/disable
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  appId       String?
+  enabled     Boolean          @default(false) // Global enable/disable
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  // scope       AppScope
+  // apps        AppFeatureFlag[]
 }
+
+// model AppFeatureFlag {
+//   appId         String
+//   featureFlagId String
+//   enabeled      Boolean      @default(false)
+//   app           DeveloperApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+//   featureFlag   FeatureFlag  @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
+
+//   @@id([appId, featureFlagId])
+// }
