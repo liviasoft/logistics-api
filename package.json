@@ -26,6 +26,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@eventstore/db-client": "^6.2.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^10.0.0",
