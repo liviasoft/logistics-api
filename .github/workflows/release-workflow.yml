@@ -32,8 +32,8 @@ jobs:
     - name: Run Tests
       run: npm test
       env:
-        DATABASE_URL: ""
-        ESDB_URL: ""
+        DATABASE_URL: "postgresql://username:password@localhost:5432/database?schema=public"
+        ESDB_URL: "esdb://localhost:2113?tls=false"
 
 
   get-current-branch:
