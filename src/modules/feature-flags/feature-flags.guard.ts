@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 // import { Observable } from 'rxjs';
 import { FEATURE_FLAGS } from './feature-flags.decorator';
-import { PrismaService } from 'src/datasources/prisma/prisma.service';
+import { PrismaService } from '../../datasources/prisma/prisma.service';
 
 class FeatureDisabledException extends MethodNotAllowedException {
   constructor(message?: string) {
