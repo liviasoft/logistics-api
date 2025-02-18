@@ -158,7 +158,7 @@ export class FeatureFlagsService {
     switch (lastEventType) {
       case FeatureFlagEventType.FeatureFlagRegistered:
         {
-          const { name, description, enabled, id } =
+          const { name, description, enabled, id, errorMessage } =
             eventData as unknown as CreateFeatureFlagDto;
 
           await this.prisma.featureFlag.create({
@@ -167,6 +167,7 @@ export class FeatureFlagsService {
               name,
               description,
               enabled,
+              errorMessage,
               id,
               revision: Number(revision.toString()),
               lastEventId,

@@ -8,6 +8,7 @@ import { Neo4jModule } from './datasources/neo4j/neo4j.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevelopersModule } from './modules/developers/developers.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DevelopersModule } from './modules/developers/developers.module';
     }),
     DevelopersModule,
     EventEmitterModule.forRoot(),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

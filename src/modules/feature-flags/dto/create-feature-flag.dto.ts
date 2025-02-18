@@ -10,6 +10,9 @@ export class CreateFeatureFlagDto {
   @IsString()
   description?: string;
 
+  @IsString()
+  errorMessage?: string;
+
   @IsBoolean()
   enabled: boolean;
 }
