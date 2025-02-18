@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// enum AppScope {
+//   DEVELOPER_PLATFORM
+//   SUPPORT_PLATFORM
+//   CUSTOMER_APP
+//   OPERATIONS_APP
+// }
+
+// model DeveloperApp {
+//   id           String           @id @default(uuid())
+//   name         String
+//   clientId     String           @unique
+//   apiKey       String
+//   createdAt    DateTime         @default(now())
+//   updatedAt    DateTime         @updatedAt
+//   featureFlags AppFeatureFlag[]
+// }
+
+model FeatureFlag {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  enabled       Boolean  @default(false) // Global enable/disable
+  errorMessage  String?  @default("This Feature is currently disabled")
+  revision      Int?     @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // scope       AppScope
+  // apps        AppFeatureFlag[]
+}
+
+// model AppFeatureFlag {
+//   appId         String
+//   featureFlagId String
+//   enabeled      Boolean      @default(false)
+//   app           DeveloperApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+//   featureFlag   FeatureFlag  @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
+
+//   @@id([appId, featureFlagId])
+// }
+
+// model DeveloperAccount {
+//   id String @id @default(uuid())
+//   email String @unique
+//   password String
+//   firstname String
+//   lastname String
+// }
