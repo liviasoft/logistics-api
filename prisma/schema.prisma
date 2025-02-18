@@ -31,12 +31,16 @@ datasource db {
 // }
 
 model FeatureFlag {
-  id          String           @id @default(uuid())
-  name        String           @unique
-  description String?
-  enabled     Boolean          @default(false) // Global enable/disable
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  enabled       Boolean  @default(false) // Global enable/disable
+  revision      Int?     @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   // scope       AppScope
   // apps        AppFeatureFlag[]
 }
@@ -49,4 +53,12 @@ model FeatureFlag {
 //   featureFlag   FeatureFlag  @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
 
 //   @@id([appId, featureFlagId])
+// }
+
+// model DeveloperAccount {
+//   id String @id @default(uuid())
+//   email String @unique
+//   password String
+//   firstname String
+//   lastname String
 // }

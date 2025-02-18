@@ -6,6 +6,8 @@ import { PrismaModule } from './datasources/prisma/prisma.module';
 import { EventstoreModule } from './datasources/eventstore/eventstore.module';
 import { Neo4jModule } from './datasources/neo4j/neo4j.module';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { DevelopersModule } from './modules/developers/developers.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    DevelopersModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

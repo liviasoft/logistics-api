@@ -1,8 +1,11 @@
 import {
+  // END,
   EventStoreDBClient,
   FORWARDS,
   jsonEvent,
-  START,
+  ReadStreamOptions,
+  SubscribeToAllOptions,
+  SubscribeToStreamOptions,
 } from '@eventstore/db-client';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,36 +14,34 @@ import { ConfigService } from '@nestjs/config';
 export class EventstoreService implements OnModuleInit {
   private client: EventStoreDBClient;
 
-  constructor(private configService: ConfigService) {}
-
-  async onModuleInit() {
+  constructor(private configService: ConfigService) {
     this.client = EventStoreDBClient.connectionString(
       this.configService.get('ESDB_URL'),
     );
   }
 
+  async onModuleInit() {}
+
   async appendEvent(streamName: string, eventType: string, data: any) {
     const event = jsonEvent({ type: eventType, data });
-    await this.client.appendToStream(streamName, event);
+    return await this.client.appendToStream(streamName, event);
   }
 
-  async readStream(streamName: string) {
-    return this.client.readStream(streamName, {
-      fromRevision: START,
-      direction: FORWARDS,
-    });
+  async readStream(
+    streamName: string,
+    options: ReadStreamOptions = { direction: FORWARDS, fromRevision: 'start' },
+  ) {
+    return this.client.readStream(streamName, options);
   }
 
-  async subscribeToStream(streamName: string, callback: (event: any) => void) {
-    const subscription = this.client.readStream(streamName, {
-      fromRevision: START,
-      direction: FORWARDS,
-    });
+  async subscribeToStream(
+    streamName: string,
+    options?: SubscribeToStreamOptions,
+  ) {
+    return this.client.subscribeToStream(streamName, options);
+  }
 
-    for await (const resolvedEvent of subscription) {
-      if (resolvedEvent.event) {
-        callback(resolvedEvent.event);
-      }
-    }
+  async subscribeToAll(options?: SubscribeToAllOptions) {
+    return this.client.subscribeToAll(options);
   }
 }

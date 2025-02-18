@@ -25,9 +25,14 @@ export class FeatureFlagsController {
     return this.featureFlagsService.findAll();
   }
 
+  @Get('events')
+  findAllEvents() {
+    return this.featureFlagsService.readAllEvents();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.featureFlagsService.findOne(+id);
+    return this.featureFlagsService.findById(id);
   }
 
   @Patch(':id')
@@ -35,11 +40,16 @@ export class FeatureFlagsController {
     @Param('id') id: string,
     @Body() updateFeatureFlagDto: UpdateFeatureFlagDto,
   ) {
-    return this.featureFlagsService.update(+id, updateFeatureFlagDto);
+    return this.featureFlagsService.update(id, updateFeatureFlagDto);
+  }
+
+  @Patch(':id/toggle')
+  toggle(@Param('id') id: string) {
+    return this.featureFlagsService.toggle(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.featureFlagsService.remove(+id);
+    return this.featureFlagsService.remove(id);
   }
 }
