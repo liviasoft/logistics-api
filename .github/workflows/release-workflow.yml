@@ -31,6 +31,10 @@ jobs:
 
     - name: Run Tests
       run: npm test
+      env:
+        DATABASE_URL: ""
+        ESDB_URL: ""
+
 
   get-current-branch:
     name: Get Target Branch
