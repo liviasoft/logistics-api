@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { DeveloperRegistrationDto } from './dto/developer-register.dto';
+import { DeveloperSignupDto } from './dto/developer-signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,8 +27,8 @@ export class AuthService {
     return `This action removes a #${id} auth`;
   }
 
-  registerDeveloper(developerRegistrationDto: DeveloperRegistrationDto) {
-    console.log({ developerRegistrationDto });
+  developerSignup(developerSignupDto: DeveloperSignupDto) {
+    console.log({ developerSignupDto });
     return `This action registers a new developer account`;
   }
 }
