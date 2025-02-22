@@ -15,7 +15,7 @@ describe('AuthController', () => {
         ConfigModule,
         PrismaModule,
         EventstoreModule,
-        EventEmitterModule,
+        EventEmitterModule.forRoot(),
       ],
       controllers: [AuthController],
       providers: [AuthService],
