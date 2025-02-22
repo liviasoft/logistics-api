@@ -1,28 +1,80 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDeveloperDto } from './dto/create-developer.dto';
-import { UpdateDeveloperDto } from './dto/update-developer.dto';
+import { Injectable, Logger } from '@nestjs/common';
+import { EventstoreService } from '../../datasources/eventstore/eventstore.service';
+import { PrismaService } from '../../datasources/prisma/prisma.service';
+import { BaseService } from '../../common/base.service';
+import { ResolvedEvent } from '@eventstore/db-client';
+import { DeveloperEventType } from '../../events/developer.events';
+import { DeveloperSignupDto } from '../auth/dto/developer-signup.dto';
+import {
+  DEVELOPER_RESOURCE,
+  STREAM_BY_CATEGORY_PREFIX,
+} from '../../common/constants';
 
 @Injectable()
-export class DevelopersService {
-  create(createDeveloperDto: CreateDeveloperDto) {
-    console.log({ createDeveloperDto });
-    return 'This action adds a new developer';
+export class DevelopersService extends BaseService {
+  private readonly logger = new Logger(DevelopersService.name, {
+    timestamp: true,
+  });
+  constructor(
+    private prisma: PrismaService,
+    private eventStore: EventstoreService,
+  ) {
+    super();
   }
 
-  findAll() {
-    return `This action returns all developers`;
+  // Events
+  async subscribeToEvents() {
+    this.logger.log(
+      `Subscribed to ${STREAM_BY_CATEGORY_PREFIX}-${DEVELOPER_RESOURCE} events`,
+    );
+    try {
+      const subscription = await this.eventStore.subscribeToStream(
+        `${STREAM_BY_CATEGORY_PREFIX}-${DEVELOPER_RESOURCE}`,
+        {
+          fromRevision: 'end',
+          resolveLinkTos: true,
+        },
+      );
+      for await (const resolvedEvent of subscription) {
+        this.handleStreamEvents(resolvedEvent);
+      }
+    } catch (error: any) {
+      this.logger.error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} developer`;
-  }
+  async handleStreamEvents(event: ResolvedEvent) {
+    const {
+      created,
+      data: eventData,
+      revision,
+      type: lastEventType,
+      id: lastEventId,
+      streamId: lastStreamId,
+    } = event.event;
+    switch (lastEventType) {
+      case DeveloperEventType.DeveloperSignedUp:
+        {
+          const { name, password, email, id } =
+            eventData as unknown as DeveloperSignupDto;
 
-  update(id: number, updateDeveloperDto: UpdateDeveloperDto) {
-    console.log({ updateDeveloperDto });
-    return `This action updates a #${id} developer`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} developer`;
+          await this.prisma.developerAccount.create({
+            data: {
+              createdAt: created,
+              name,
+              password,
+              email,
+              id,
+              revision: Number(revision.toString()),
+              lastEventId,
+              lastEventType,
+              lastStreamId,
+            },
+          });
+        }
+        break;
+      default:
+        break;
+    }
   }
 }
