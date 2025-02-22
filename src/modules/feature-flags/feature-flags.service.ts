@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -12,15 +13,20 @@ import {
   FeatureFlagEventType,
   getFeatureFlagStreamName,
 } from '../../events/featureFlag.events';
-import { ObjectId } from 'bson';
 import { AllStreamResolvedEvent, ResolvedEvent } from '@eventstore/db-client';
+import { BaseService } from '../../common/base.service';
 
 @Injectable()
-export class FeatureFlagsService {
+export class FeatureFlagsService extends BaseService {
+  private readonly logger = new Logger(FeatureFlagsService.name, {
+    timestamp: true,
+  });
   constructor(
     private prisma: PrismaService,
     private eventStore: EventstoreService,
-  ) {}
+  ) {
+    super();
+  }
 
   // Read
   async findAll() {
@@ -45,7 +51,6 @@ export class FeatureFlagsService {
 
   // Write
   async create(createFeatureFlagDto: CreateFeatureFlagDto) {
-    console.log({ createFeatureFlagDto });
     const existing = await this.prisma.featureFlag.findUnique({
       where: { name: createFeatureFlagDto.name },
     });
@@ -59,13 +64,13 @@ export class FeatureFlagsService {
         getFeatureFlagStreamName(),
         FeatureFlagEventType.FeatureFlagRegistered,
         {
-          id: this.createId(),
+          id: this.createResourceId('feature_flag'),
           ...createFeatureFlagDto,
           createdAt: new Date(),
         },
       );
     } catch (error) {
-      console.log({ error });
+      this.logger.error(error);
       throw new ServiceUnavailableException('Error connecting to EventStoreDB');
     }
     return 'This action adds a new featureFlag';
@@ -81,7 +86,7 @@ export class FeatureFlagsService {
         { id, ...data, updatedAt: new Date() },
       );
     } catch (error: any) {
-      console.log(error);
+      this.logger.error(error);
     }
     return `This action updates a #${id} featureFlag`;
   }
@@ -113,19 +118,14 @@ export class FeatureFlagsService {
         { id },
       );
     } catch (error: any) {
-      console.log(error);
+      this.logger.error(error);
     }
     return `This action removes a #${id} featureFlag`;
   }
 
-  // Utils
-  createId() {
-    return `feature_flag-${new ObjectId().toString()}`;
-  }
-
   // Events
   async subscribeToEvents() {
-    console.log('Event Fired');
+    this.logger.log(`Subscribed to ${getFeatureFlagStreamName()} events`);
     try {
       const subscription = await this.eventStore.subscribeToStream(
         getFeatureFlagStreamName(),
@@ -137,16 +137,17 @@ export class FeatureFlagsService {
         this.handleStreamEvents(resolvedEvent);
       }
     } catch (error: any) {
-      console.log({ error });
+      this.logger.error(error);
     }
   }
 
   handleAllStoredEvents(event: AllStreamResolvedEvent) {
-    console.log({ event });
+    this.logger.log({ event });
     return;
   }
 
   async handleStreamEvents(event: ResolvedEvent) {
+    this.logger.log({ event });
     const {
       created,
       data: eventData,

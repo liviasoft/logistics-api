@@ -10,3 +10,11 @@
 //   | DeveloperAccountRegistered
 //   | DeveloperLoggedIn
 //   | DeveloperRegisteredApplication;
+
+export enum DeveloperEventType {
+  DeveloperSignedUp = 'DeveloperSignedUp',
+}
+
+// export const DEVELOPER = 'developer' as const;
+
+// export const getDeveloperStreamName = (id: string) => `${DEVELOPER}-${id}`;

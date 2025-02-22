@@ -7,19 +7,24 @@ import {
   FeatureGuard,
 } from './modules/feature-flags/feature-flags.guard';
 import { PrismaService } from './datasources/prisma/prisma.service';
+import { DevelopersService } from './modules/developers/developers.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.enableVersioning();
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
   app.useGlobalGuards(new FeatureFlagsGuard(reflector, prisma));
   app.useGlobalGuards(new FeatureGuard(reflector, prisma));
   await app.listen(process.env.PORT ?? 3000, async () => {
     const featureFlagService = app.get(FeatureFlagsService);
+    const developersService = app.get(DevelopersService);
     featureFlagService.subscribeToEvents();
+    developersService.subscribeToEvents();
   });
 }
 bootstrap();
