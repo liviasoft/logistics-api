@@ -33,5 +33,9 @@ module.exports = {
         "ignoreRegExpLiterals": true
       }
     ],
+    "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+    ],
   },
 };

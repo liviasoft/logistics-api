@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventstoreModule } from '../../datasources/eventstore/eventstore.module';
 import { PrismaModule } from '../../datasources/prisma/prisma.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { DevelopersModule } from '../developers/developers.module';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -16,6 +17,7 @@ describe('AuthController', () => {
         PrismaModule,
         EventstoreModule,
         EventEmitterModule.forRoot(),
+        DevelopersModule,
       ],
       controllers: [AuthController],
       providers: [AuthService],

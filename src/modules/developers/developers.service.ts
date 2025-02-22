@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventstoreService } from '../../datasources/eventstore/eventstore.service';
 import { PrismaService } from '../../datasources/prisma/prisma.service';
 import { BaseService } from '../../common/base.service';
@@ -9,6 +9,8 @@ import {
   DEVELOPER_RESOURCE,
   STREAM_BY_CATEGORY_PREFIX,
 } from '../../common/constants';
+import { CreateDeveloperDto } from './dto/create-developer.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class DevelopersService extends BaseService {
@@ -18,8 +20,34 @@ export class DevelopersService extends BaseService {
   constructor(
     private prisma: PrismaService,
     private eventStore: EventstoreService,
+    private eventEmitter: EventEmitter2,
   ) {
     super();
+  }
+
+  async createAccount(accountData: CreateDeveloperDto) {
+    const id = this.createResourceId(DEVELOPER_RESOURCE);
+    try {
+      await this.eventStore.appendEvent(
+        id,
+        DeveloperEventType.DeveloperSignedUpWithEmail,
+        { ...accountData, createdAt: new Date() },
+      );
+      this.eventEmitter.emit(
+        DeveloperEventType.DeveloperSignedUpWithEmail,
+        accountData,
+      );
+      return { id, ...accountData };
+    } catch (error: any) {
+      this.logger.error(error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async findAccountByEmail(email: string) {
+    return await this.prisma.developerAccount.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+    });
   }
 
   // Events
@@ -53,7 +81,7 @@ export class DevelopersService extends BaseService {
       streamId: lastStreamId,
     } = event.event;
     switch (lastEventType) {
-      case DeveloperEventType.DeveloperSignedUp:
+      case DeveloperEventType.DeveloperSignedUpWithEmail:
         {
           const { name, password, email, id } =
             eventData as unknown as DeveloperSignupDto;

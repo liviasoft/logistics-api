@@ -12,7 +12,7 @@
 //   | DeveloperRegisteredApplication;
 
 export enum DeveloperEventType {
-  DeveloperSignedUp = 'DeveloperSignedUp',
+  DeveloperSignedUpWithEmail = 'DeveloperSignedUpWithEmail',
 }
 
 // export const DEVELOPER = 'developer' as const;

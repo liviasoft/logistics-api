@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 // import { UpdateAuthDto } from './dto/update-auth.dto';
 import { DeveloperSignupDto } from './dto/developer-signup.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
+import { DeveloperLoginDto } from './dto/developer-login.dto';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -21,6 +22,12 @@ export class AuthController {
   @FeatureFlags('DEVELOPER_SIGNUP')
   developerRegister(@Body() developerSignupData: DeveloperSignupDto) {
     return this.authService.developerSignup(developerSignupData);
+  }
+
+  @Post('/developer/login')
+  @FeatureFlags('DEVELOPER_LOGIN')
+  developerLogin(@Body() developerLoginData: DeveloperLoginDto) {
+    return this.authService.developerLogin(developerLoginData);
   }
 
   // @Post()

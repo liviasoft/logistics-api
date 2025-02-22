@@ -2,17 +2,17 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
   ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Case } from 'change-case-all';
 import { DeveloperSignupDto } from './dto/developer-signup.dto';
-import { EventstoreService } from '../../datasources/eventstore/eventstore.service';
-import { PrismaService } from '../../datasources/prisma/prisma.service';
 import { BaseService } from '../../common/base.service';
-import { DeveloperEventType } from '../../events/developer.events';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DEVELOPER_RESOURCE } from '../../common/constants';
+import { DeveloperLoginDto } from './dto/developer-login.dto';
+import { DevelopersService } from '../developers/developers.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService extends BaseService {
@@ -20,43 +20,27 @@ export class AuthService extends BaseService {
     timestamp: true,
   });
   constructor(
-    private prisma: PrismaService,
-    private eventStore: EventstoreService,
-    private eventEmitter: EventEmitter2,
+    private readonly developersService: DevelopersService,
+    private jwtService: JwtService,
   ) {
     super();
   }
 
   async developerSignup(developerSignupDto: DeveloperSignupDto) {
-    const { email, name, password } = developerSignupDto;
-    const emailInUse = await this.prisma.developerAccount.findFirst({
-      where: { email: { equals: email, mode: 'insensitive' } },
-    });
-    if (emailInUse) throw new BadRequestException('Email already registered');
-    const id = this.createResourceId(DEVELOPER_RESOURCE);
+    const { email, name: rawName, password: rawPassword } = developerSignupDto;
+    const existingAccount =
+      await this.developersService.findAccountByEmail(email);
+    if (existingAccount)
+      throw new BadRequestException('Email already registered');
+
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const accountDetails = {
-        id,
-        password: hashedPassword,
-        name: Case.capital(name),
-        email,
-      };
-      await this.eventStore.appendEvent(
-        id,
-        DeveloperEventType.DeveloperSignedUp,
-        {
-          ...accountDetails,
-          createdAt: new Date(),
-        },
-      );
-      this.eventEmitter.emit(
-        DeveloperEventType.DeveloperSignedUp,
-        accountDetails,
-      );
+      const password = await bcrypt.hash(rawPassword, 10);
+      const name = Case.capital(rawName);
+      const accountDetails = { password, name, email };
       return this.formatResponse({
-        data: accountDetails,
-        message: `This action registers a new developer account - ${id}`,
+        data: await this.developersService.createAccount(accountDetails),
+        statusCode: 201,
+        message: `Developer Account registered successfully`,
       });
     } catch (error: any) {
       this.logger.error(error);
@@ -64,5 +48,27 @@ export class AuthService extends BaseService {
         'An error occured, please contact support',
       );
     }
+  }
+
+  async developerLogin(developerLoginDto: DeveloperLoginDto) {
+    const { email, password } = developerLoginDto;
+    const existingAccount =
+      await this.developersService.findAccountByEmail(email);
+    if (!existingAccount)
+      throw new NotFoundException(`${email} is not registered`);
+    const {
+      password: _,
+      lastEventId: __,
+      lastEventType: ___,
+      lastStreamId: ____,
+      revision: _____,
+      ...data
+    } = existingAccount;
+    const passwordsMatch = await bcrypt.compare(
+      password,
+      existingAccount.password,
+    );
+    if (!passwordsMatch) throw new UnauthorizedException('Invalid credentials');
+    return this.formatResponse({ message: 'Logged In Successfully', data });
   }
 }
