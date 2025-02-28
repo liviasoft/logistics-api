@@ -15,6 +15,7 @@ import { AsyncStorageMiddleware } from './common/async-storage/async-storage.mid
 import { CustomerModule } from './modules/customer/customer.module';
 import { AsyncStorageModule } from './common/async-storage/async-storage.module';
 import { ClientAppModule } from './modules/client-app/client-app.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ClientAppModule } from './modules/client-app/client-app.module';
     CustomerModule,
     AsyncStorageModule,
     ClientAppModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
