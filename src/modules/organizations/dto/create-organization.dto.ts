@@ -1,11 +1,12 @@
 import { OrgType } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
+import { IsNotEmptyString } from '../../../common/validators';
 
 export class CreateOrganizationDto {
-  @IsString()
+  @IsNotEmptyString('Organization name')
   name: string;
 
-  @IsOptional()
+  // @IsOptional()
   @IsEnum(OrgType)
   type: string;
 }
