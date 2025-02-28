@@ -2,21 +2,28 @@ import {
   Controller,
   Post,
   Body,
-  // Get,
-  // Patch,
-  // Param,
-  // Delete,
+  UseGuards,
+  Get,
+  Res,
+  HttpStatus,
+  Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { CreateAuthDto } from './dto/create-auth.dto';
-// import { UpdateAuthDto } from './dto/update-auth.dto';
 import { DeveloperSignupDto } from './dto/developer-signup.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
 import { DeveloperLoginDto } from './dto/developer-login.dto';
+import { AuthGuard } from './auth.guard';
+import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
+import { Request, Response } from 'express';
+import { DeveloperRefreshTokenDto } from './dto/developer-refresh-token.dto';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly asyncStorageService: AsyncStorageService,
+  ) {}
 
   @Post('/developer/signup')
   @FeatureFlags('DEVELOPER_SIGNUP')
@@ -26,32 +33,62 @@ export class AuthController {
 
   @Post('/developer/login')
   @FeatureFlags('DEVELOPER_LOGIN')
-  developerLogin(@Body() developerLoginData: DeveloperLoginDto) {
-    return this.authService.developerLogin(developerLoginData);
+  async developerLogin(
+    @Body() developerLoginData: DeveloperLoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const {
+      accessToken,
+      refreshToken: { token: refreshToken, expiresAt },
+      csrfToken,
+      user,
+    } = await this.authService.developerLogin(developerLoginData);
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      expires: expiresAt,
+    });
+    response.cookie('csrfToken', csrfToken);
+    return {
+      data: { accessToken, refreshToken, csrfToken, user },
+      message: 'Logged In Successfully',
+      statusCode: HttpStatus.OK,
+    };
   }
 
-  // @Post()
-  // create(@Body() createAuthDto: CreateAuthDto) {
-  //   return this.authService.create(createAuthDto);
-  // }
+  @Post('/developer/refresh-token')
+  async developerRefreshAuth(
+    @Body() { userId }: DeveloperRefreshTokenDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const oldRefreshToken = request.cookies['refreshToken'];
+    if (!oldRefreshToken) throw new BadRequestException();
+    const {
+      accessToken,
+      refreshToken: { token: refreshToken, expiresAt },
+      csrfToken,
+      user,
+    } = await this.authService.developerRefreshAuth(userId, oldRefreshToken);
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      expires: expiresAt,
+    });
+    response.cookie('csrfToken', csrfToken);
+    return {
+      data: { accessToken, refreshToken, csrfToken, user },
+      message: 'Token Refreshed',
+      statusCode: HttpStatus.OK,
+    };
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.authService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.authService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-  //   return this.authService.update(+id, updateAuthDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.authService.remove(+id);
-  // }
+  @Get('/developer/me')
+  @UseGuards(AuthGuard)
+  getLoggedInDeveloperDetails() {
+    return {
+      user: this.asyncStorageService.get('user'),
+      auth: this.asyncStorageService.get('auth'),
+      isDeveloper: this.asyncStorageService.get('isDeveloper'),
+      requestId: this.asyncStorageService.get('requestId'),
+    };
+  }
 }

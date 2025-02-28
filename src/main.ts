@@ -1,11 +1,9 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { FeatureFlagsService } from './modules/feature-flags/feature-flags.service';
-import {
-  FeatureFlagsGuard,
-  FeatureGuard,
-} from './modules/feature-flags/feature-flags.guard';
+import { FeatureFlagsGuard } from './modules/feature-flags/feature-flags.guard';
 import { PrismaService } from './datasources/prisma/prisma.service';
 import { DevelopersService } from './modules/developers/developers.service';
 
@@ -18,8 +16,8 @@ async function bootstrap() {
   );
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
+  app.use(cookieParser());
   app.useGlobalGuards(new FeatureFlagsGuard(reflector, prisma));
-  app.useGlobalGuards(new FeatureGuard(reflector, prisma));
   await app.listen(process.env.PORT ?? 3000, async () => {
     const featureFlagService = app.get(FeatureFlagsService);
     const developersService = app.get(DevelopersService);

@@ -47,6 +47,14 @@ export class DevelopersService extends BaseService {
   async findAccountByEmail(email: string) {
     return await this.prisma.developerAccount.findFirst({
       where: { email: { equals: email, mode: 'insensitive' } },
+      include: { _count: { select: { apps: true, memberships: true } } },
+    });
+  }
+
+  async findAccountById(id: string) {
+    return await this.prisma.developerAccount.findUnique({
+      where: { id },
+      include: { _count: { select: { apps: true, memberships: true } } },
     });
   }
 

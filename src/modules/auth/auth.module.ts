@@ -4,9 +4,12 @@ import { AuthController } from './auth.controller';
 import { DevelopersService } from '../developers/developers.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CustomerService } from '../customer/customer.service';
+import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
 
 @Module({
   imports: [
+    AsyncStorageModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config) => ({
@@ -19,6 +22,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DevelopersService],
+  providers: [AuthService, DevelopersService, CustomerService],
 })
 export class AuthModule {}

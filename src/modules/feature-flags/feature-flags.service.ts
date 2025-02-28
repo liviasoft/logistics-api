@@ -94,17 +94,22 @@ export class FeatureFlagsService extends BaseService {
   async toggle(id: string) {
     const ff = await this.prisma.featureFlag.findUnique({ where: { id } });
     if (!ff) throw new NotFoundException('Feature Flag not found');
-    await this.eventStore.appendEvent(
-      getFeatureFlagStreamName(),
-      ff.enabled
-        ? FeatureFlagEventType.FeatureFlagDisabled
-        : FeatureFlagEventType.FeatureFlagEnabled,
-      {
-        id,
-        enabled: !ff.enabled,
-        updatedAt: new Date(),
-      },
-    );
+    try {
+      await this.eventStore.appendEvent(
+        getFeatureFlagStreamName(),
+        ff.enabled
+          ? FeatureFlagEventType.FeatureFlagDisabled
+          : FeatureFlagEventType.FeatureFlagEnabled,
+        {
+          id,
+          enabled: !ff.enabled,
+          updatedAt: new Date(),
+        },
+      );
+    } catch (error: any) {
+      this.logger.error(error);
+      throw new ServiceUnavailableException();
+    }
     return `${id} toggled : ${!ff.enabled} `;
   }
 

@@ -25,7 +25,6 @@ module.exports = {
       "error",
       {
         "code": 100,
-        // "tabWidth": 4,
         "ignoreComments": true,
         "ignoreUrls": true,
         "ignoreStrings": true,
