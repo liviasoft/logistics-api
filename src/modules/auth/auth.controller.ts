@@ -69,11 +69,9 @@ export class AuthController {
       csrfToken,
       user,
     } = await this.authService.developerRefreshAuth(userId, oldRefreshToken);
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      expires: expiresAt,
-    });
-    response.cookie('csrfToken', csrfToken);
+    const cookieOptions = { httpOnly: true, expires: expiresAt };
+    response.cookie('refreshToken', refreshToken, cookieOptions);
+    response.cookie('csrfToken', csrfToken, cookieOptions);
     return {
       data: { accessToken, refreshToken, csrfToken, user },
       message: 'Token Refreshed',

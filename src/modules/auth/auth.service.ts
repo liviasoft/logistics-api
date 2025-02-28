@@ -93,7 +93,7 @@ export class AuthService extends BaseService {
     const { id: userId } = data;
     const csrfToken = new ObjectId();
     const refreshToken = await this.generateRefreshToken(userId, 7, 'DAY');
-    const accessToken = await this.generateAccessToken({ userId, csrfToken });
+    const accessToken = await this.generateAccessToken({ userId });
     return { accessToken, user: data, csrfToken, refreshToken };
   }
 
@@ -116,7 +116,7 @@ export class AuthService extends BaseService {
       ...data
     } = account;
     const csrfToken = new ObjectId();
-    const accessToken = await this.generateAccessToken({ userId, csrfToken });
+    const accessToken = await this.generateAccessToken({ userId });
     if (
       Date.parse(String(validToken.expiresAt)) - Date.now() <
       2 * TIME_PERIOD.HOUR * MILLISECONDS

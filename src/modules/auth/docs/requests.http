@@ -1,9 +1,7 @@
 # Variables
-@baseUrl = http://localhost:3000
-@Authorization = Bearer your_access_token
-@csrfToken = you_csrf_token
+@Authorization = Bearer {{token}}
 
-# Signup as Developer
+# Developer Signup
 POST {{baseUrl}}/api/v1/auth/developer/signup HTTP/1.1
 Content-Type: application/json
 
@@ -16,18 +14,18 @@ Content-Type: application/json
 ###
 
 # Developer Login
-POST {{baseUrl}}/api/v1/auth/developer/signup HTTP/1.1
+POST {{baseUrl}}/api/v1/auth/developer/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "email": "your@gmail.com",
-    "password": "your password",
+    "email": "{{yourEmail}}",
+    "password": "{{yourPassword}}"
 }
 
 ###
 
 # Developer Refresh Auth (when access Token expires
-POST {{baseUrl}}/api/v1/auth/developer/refresh-token
+POST {{baseUrl}}/api/v1/auth/developer/refresh-token HTTP/1.1
 Content-Type: application/json
 
 {
@@ -37,7 +35,7 @@ Content-Type: application/json
 ###
 
 # View Developer profile
-GET {{baseUrl}}/api/v1/auth/developer/me HTTP 1/1
+GET {{baseUrl}}/api/v1/auth/developer/me HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
 
