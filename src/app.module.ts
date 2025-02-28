@@ -14,6 +14,7 @@ import { AuthMiddleware } from './modules/auth/auth.middleware';
 import { AsyncStorageMiddleware } from './common/async-storage/async-storage.middleware';
 import { CustomerModule } from './modules/customer/customer.module';
 import { AsyncStorageModule } from './common/async-storage/async-storage.module';
+import { ClientAppModule } from './modules/client-app/client-app.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AsyncStorageModule } from './common/async-storage/async-storage.module'
     RolesModule,
     CustomerModule,
     AsyncStorageModule,
+    ClientAppModule,
   ],
   controllers: [AppController],
   providers: [AppService],
