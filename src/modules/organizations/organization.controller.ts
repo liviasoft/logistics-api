@@ -10,13 +10,16 @@ import {
 import { OrganizationService } from './organization.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
+import { FeatureFlagsList } from '../../common/constants';
 
 @Controller({ path: 'organizations', version: '1' })
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
   @Post()
-  create(@Body() createOrganizationDto: CreateOrganizationDto) {
+  @FeatureFlags(FeatureFlagsList.REGISTER_ORGANIZATION)
+  registerOrganization(@Body() createOrganizationDto: CreateOrganizationDto) {
     return this.organizationService.create(createOrganizationDto);
   }
 
