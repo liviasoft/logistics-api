@@ -13,25 +13,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// enum AppScope {
-//   DEVELOPER_PLATFORM
-//   SUPPORT_PLATFORM
-//   CUSTOMER_APP
-//   OPERATIONS_APP
-// }
+enum OrgRole {
+  OWNER
+  ADMIN
+  DEVELOPER
+  READ_ONLY
+}
 
-// model DeveloperApp {
-//   id           String           @id @default(uuid())
-//   name         String
-//   clientId     String           @unique
-//   apiKey       String
-//   createdAt    DateTime         @default(now())
-//   updatedAt    DateTime         @updatedAt
-//   featureFlags AppFeatureFlag[]
-// }
+enum OrgType {
+  INDIVIDUAL
+  COMPANY
+}
 
 model FeatureFlag {
-  id            String   @id @default(uuid())
+  id            String   @id @default(cuid())
   name          String   @unique
   description   String?
   enabled       Boolean  @default(false) // Global enable/disable
@@ -42,29 +37,155 @@ model FeatureFlag {
   lastStreamId  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  // scope       AppScope
-  // apps        AppFeatureFlag[]
 }
 
-// model AppFeatureFlag {
-//   appId         String
-//   featureFlagId String
-//   enabeled      Boolean      @default(false)
-//   app           DeveloperApp @relation(fields: [appId], references: [id], onDelete: Cascade)
-//   featureFlag   FeatureFlag  @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
-
-//   @@id([appId, featureFlagId])
-// }
-
 model DeveloperAccount {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
-  name     String
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
   revision      Int?     @default(0) @db.Integer
   lastEventId   String?
   lastEventType String?
   lastStreamId  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  apps        App[]
+  memberships OrganizationMember[]
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      OrgType  @default(INDIVIDUAL)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members OrganizationMember[]
+  apps    App[]
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  accountId      String
+  organizationId String
+  joinedAt       DateTime @default(now())
+
+  role         OrgRole          @default(DEVELOPER)
+  account      DeveloperAccount @relation(fields: [accountId], references: [id])
+  organization Organization     @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, accountId])
+}
+
+model App {
+  id             String @id @default(cuid())
+  name           String
+  creatorId      String
+  organizationId String
+
+  customers    AppCustomer[]
+  featureFlags AppFeatureFlag[]
+  orders       AppOrder[]
+  packages     AppPackage[]
+
+  creator      DeveloperAccount @relation(fields: [creatorId], references: [id])
+  organization Organization     @relation(fields: [organizationId], references: [id])
+}
+
+model AppFeatureFlag {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  appId         String
+  description   String?
+  enabled       Boolean  @default(false) // Global enable/disable
+  errorMessage  String?  @default("This Feature is currently disabled")
+  revision      Int?     @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+}
+
+model AppRole {
+  role         String    @id @unique
+  description  String
+  isDefault    Boolean   @default(false) @db.Boolean
+  requiresAuth Boolean   @default(false) @db.Boolean
+  active       Boolean   @default(true) @db.Boolean
+  created      DateTime  @default(now())
+  updated      DateTime? @updatedAt
+
+  permissions AppPermission[]
+}
+
+model AppPermission {
+  role      String
+  resource  String
+  create    Boolean   @default(false)
+  readOwn   Boolean   @default(false)
+  readAny   Boolean   @default(false)
+  updateOwn Boolean   @default(false)
+  updateAny Boolean   @default(false)
+  deleteOwn Boolean   @default(false)
+  deleteAny Boolean   @default(false)
+  created   DateTime  @default(now())
+  updated   DateTime? @updatedAt
+
+  roleData AppRole @relation(fields: [role], references: [role], onDelete: Cascade)
+
+  @@id([role, resource])
+}
+
+model AppCustomer {
+  id        String   @id @default(cuid())
+  appId     String
+  firstname String
+  lastname  String
+  email     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  app      App        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  AppOrder AppOrder[]
+
+  @@unique([appId, id])
+  @@unique([appId, email])
+}
+
+model AppPackage {
+  id          String   @id @default(cuid())
+  orderId     String
+  description String
+  appId       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+}
+
+model AppOrder {
+  id         String   @id @default(cuid())
+  appId      String
+  customerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  app      App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  customer AppCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([appId, id])
+}
+
+model RefreshToken {
+  token     String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

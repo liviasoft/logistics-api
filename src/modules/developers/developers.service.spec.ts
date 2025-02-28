@@ -3,13 +3,19 @@ import { DevelopersService } from './developers.service';
 import { ConfigModule } from '@nestjs/config';
 import { EventstoreModule } from '../../datasources/eventstore/eventstore.module';
 import { PrismaModule } from '../../datasources/prisma/prisma.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 describe('DevelopersService', () => {
   let service: DevelopersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule, PrismaModule, EventstoreModule],
+      imports: [
+        ConfigModule,
+        PrismaModule,
+        EventstoreModule,
+        EventEmitterModule.forRoot(),
+      ],
       providers: [DevelopersService],
     }).compile();
 

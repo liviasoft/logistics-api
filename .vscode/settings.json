@@ -1,0 +1,23 @@
+{
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "yourEmail": "yourEmail",
+      "yourPassword": "yourPassword"
+    },
+    "dev": {
+      "baseUrl": "http://localhost:3000",
+      "token": "ey...",
+      "csrfToken": "",
+    },
+    "staging": {
+      "baseUrl": "",
+      "token": "",
+      "csrfToken": "",
+    },
+    "prod": {
+      "baseUrl": "",
+      "token": "",
+      "csrfToken": "",
+    },
+  }
+}

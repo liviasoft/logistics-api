@@ -1,4 +1,4 @@
-import { CreateFeatureFlagDto } from 'src/modules/feature-flags/dto/create-feature-flag.dto';
+import { CreateFeatureFlagDto } from '../modules/feature-flags/dto/create-feature-flag.dto';
 import { Event } from './events';
 // import { UpdateFeatureFlagDto } from 'src/modules/feature-flags/dto/update-feature-flag.dto';
 

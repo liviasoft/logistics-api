@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FeatureFlagsModule } from './modules/feature-flags/feature-flags.module';
@@ -9,6 +9,11 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevelopersModule } from './modules/developers/developers.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { AuthMiddleware } from './modules/auth/auth.middleware';
+import { AsyncStorageMiddleware } from './common/async-storage/async-storage.middleware';
+import { CustomerModule } from './modules/customer/customer.module';
+import { AsyncStorageModule } from './common/async-storage/async-storage.module';
 
 @Module({
   imports: [
@@ -22,8 +27,16 @@ import { AuthModule } from './modules/auth/auth.module';
     DevelopersModule,
     EventEmitterModule.forRoot(),
     AuthModule,
+    RolesModule,
+    CustomerModule,
+    AsyncStorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AsyncStorageMiddleware).forRoutes('*');
+    consumer.apply(AuthMiddleware).forRoutes('*');
+  }
+}
