@@ -6,21 +6,36 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
-import { FeatureFlagsList } from '../../common/constants';
+import { DEVELOPER_RESOURCE, FeatureFlagsList } from '../../common/constants';
+import { AuthGuard } from '../auth/auth.guard';
+import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 
 @Controller({ path: 'organizations', version: '1' })
 export class OrganizationController {
-  constructor(private readonly organizationService: OrganizationService) {}
+  constructor(
+    private readonly organizationService: OrganizationService,
+    private readonly asyncStorageService: AsyncStorageService,
+  ) {}
 
   @Post()
   @FeatureFlags(FeatureFlagsList.REGISTER_ORGANIZATION)
-  registerOrganization(@Body() createOrganizationDto: CreateOrganizationDto) {
-    return this.organizationService.create(createOrganizationDto);
+  @UseGuards(AuthGuard)
+  async registerOrganization(
+    @Body() createOrganizationDto: CreateOrganizationDto,
+  ) {
+    const developerId = await this.asyncStorageService.get<string>(
+      `${DEVELOPER_RESOURCE}Id`,
+    );
+    return this.organizationService.createOrganization(
+      createOrganizationDto,
+      developerId,
+    );
   }
 
   @Get()

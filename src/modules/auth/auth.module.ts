@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomerService } from '../customer/customer.service';
 import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AsyncStorageModule } from '../../common/async-storage/async-storage.mod
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DevelopersService, CustomerService],
+  providers: [AuthService, DevelopersService, CustomerService, AuthGuard],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}

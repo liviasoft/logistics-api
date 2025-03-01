@@ -1,3 +1,5 @@
+import { Position } from '@eventstore/db-client';
+
 export type Event<
   EventType extends string = string,
   EventData extends Record<string, unknown> = Record<string, unknown>,
@@ -15,3 +17,35 @@ export type ApplyEvent<Entity, Event> = (
 // const StreamAggregator =
 //   <Entity, Event>(when: ApplyEvent<Entity, Event>) =>
 //   (events: Event[]): Entity => {};
+
+export type ExtractedEvent =
+  | {
+      streamId: string;
+      id: string;
+      isJson: true;
+      revision: bigint;
+      type: string;
+      created: Date;
+      data: string | Record<string | number, unknown> | unknown[];
+      metadata:
+        | string
+        | Record<string | number, unknown>
+        | unknown[]
+        | Uint8Array<ArrayBufferLike>;
+      position: Position;
+    }
+  | {
+      streamId: string;
+      id: string;
+      isJson: false;
+      revision: bigint;
+      type: string;
+      created: Date;
+      data: Uint8Array<ArrayBufferLike>;
+      metadata:
+        | string
+        | Record<string | number, unknown>
+        | unknown[]
+        | Uint8Array<ArrayBufferLike>;
+      position: Position;
+    };

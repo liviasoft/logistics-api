@@ -26,48 +26,57 @@ enum OrgType {
 }
 
 model FeatureFlag {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  description   String?
-  enabled       Boolean  @default(false) // Global enable/disable
-  errorMessage  String?  @default("This Feature is currently disabled")
-  revision      Int?     @default(0) @db.Integer
+  id           String  @id @default(cuid())
+  name         String  @unique
+  description  String?
+  enabled      Boolean @default(false) // Global enable/disable
+  errorMessage String? @default("This Feature is currently disabled")
+
+  revision      Int?    @default(0) @db.Integer
   lastEventId   String?
   lastEventType String?
   lastStreamId  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model DeveloperAccount {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  password      String
-  name          String
-  revision      Int?     @default(0) @db.Integer
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String
+
+  revision      Int?    @default(0) @db.Integer
   lastEventId   String?
   lastEventType String?
   lastStreamId  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
-  apps        App[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientApps  ClientApp[]
   memberships OrganizationMember[]
 }
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String   
-  type      OrgType  @default(INDIVIDUAL)
+  id   String  @id @default(cuid())
+  name String
+  type OrgType @default(INDIVIDUAL)
+
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members OrganizationMember[]
-  apps    App[]
+  members    OrganizationMember[]
+  clientApps ClientApp[]
 }
 
 model OrganizationMember {
-  id             String   @id @default(cuid())
   accountId      String
   organizationId String
   joinedAt       DateTime @default(now())
@@ -76,42 +85,49 @@ model OrganizationMember {
   account      DeveloperAccount @relation(fields: [accountId], references: [id])
   organization Organization     @relation(fields: [organizationId], references: [id])
 
-  @@unique([organizationId, accountId])
+  @@id([organizationId, accountId])
 }
 
-model App {
+model ClientApp {
   id             String @id @default(cuid())
   name           String
   creatorId      String
   organizationId String
 
-  customers    AppCustomer[]
-  featureFlags AppFeatureFlag[]
-  orders       AppOrder[]
-  packages     AppPackage[]
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+
+  customers    ClientAppCustomer[]
+  featureFlags ClientAppFeatureFlag[]
+  orders       ClientAppOrder[]
+  packages     ClientAppPackage[]
 
   creator      DeveloperAccount @relation(fields: [creatorId], references: [id])
   organization Organization     @relation(fields: [organizationId], references: [id])
 }
 
-model AppFeatureFlag {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  appId         String
-  description   String?
-  enabled       Boolean  @default(false) // Global enable/disable
-  errorMessage  String?  @default("This Feature is currently disabled")
-  revision      Int?     @default(0) @db.Integer
+model ClientAppFeatureFlag {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  clientAppId  String
+  description  String?
+  enabled      Boolean @default(false) // Global enable/disable
+  errorMessage String? @default("This Feature is currently disabled")
+
+  revision      Int?    @default(0) @db.Integer
   lastEventId   String?
   lastEventType String?
   lastStreamId  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
-  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientApp ClientApp @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
 }
 
-model AppRole {
+model ClientAppRole {
   role         String    @id @unique
   description  String
   isDefault    Boolean   @default(false) @db.Boolean
@@ -120,10 +136,10 @@ model AppRole {
   created      DateTime  @default(now())
   updated      DateTime? @updatedAt
 
-  permissions AppPermission[]
+  permissions ClientAppPermission[]
 }
 
-model AppPermission {
+model ClientAppPermission {
   role      String
   resource  String
   create    Boolean   @default(false)
@@ -136,50 +152,68 @@ model AppPermission {
   created   DateTime  @default(now())
   updated   DateTime? @updatedAt
 
-  roleData AppRole @relation(fields: [role], references: [role], onDelete: Cascade)
+  roleData ClientAppRole @relation(fields: [role], references: [role], onDelete: Cascade)
 
   @@id([role, resource])
 }
 
-model AppCustomer {
-  id        String   @id @default(cuid())
-  appId     String
-  firstname String
-  lastname  String
-  email     String
-  password  String
+model ClientAppCustomer {
+  id          String @id @default(cuid())
+  clientAppId String
+  firstname   String
+  lastname    String
+  email       String
+  password    String
+
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  app      App        @relation(fields: [appId], references: [id], onDelete: Cascade)
-  AppOrder AppOrder[]
+  clientApp      ClientApp        @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
+  clientAppOrder ClientAppOrder[]
 
-  @@unique([appId, id])
-  @@unique([appId, email])
+  @@unique([clientAppId, id])
+  @@unique([clientAppId, email])
 }
 
-model AppPackage {
-  id          String   @id @default(cuid())
+model ClientAppPackage {
+  id          String @id @default(cuid())
   orderId     String
   description String
-  appId       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  clientAppId String
 
-  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientApp ClientApp @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
 }
 
-model AppOrder {
-  id         String   @id @default(cuid())
-  appId      String
-  customerId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model ClientAppOrder {
+  id          String @id @default(cuid())
+  clientAppId String
+  customerId  String
 
-  app      App         @relation(fields: [appId], references: [id], onDelete: Cascade)
-  customer AppCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
 
-  @@unique([appId, id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clientApp ClientApp         @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
+  customer  ClientAppCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([clientAppId, id])
 }
 
 model RefreshToken {

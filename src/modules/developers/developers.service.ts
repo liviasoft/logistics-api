@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventstoreService } from '../../datasources/eventstore/eventstore.service';
 import { PrismaService } from '../../datasources/prisma/prisma.service';
 import { BaseService } from '../../common/base.service';
-import { ResolvedEvent } from '@eventstore/db-client';
+import { EventData, ResolvedEvent } from '@eventstore/db-client';
 import { DeveloperEventType } from '../../events/developer.events';
 import { DeveloperSignupDto } from '../auth/dto/developer-signup.dto';
 import {
@@ -10,7 +10,10 @@ import {
   STREAM_BY_CATEGORY_PREFIX,
 } from '../../common/constants';
 import { CreateDeveloperDto } from './dto/create-developer.dto';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { OrganizationEventType } from '../../events/organization.events';
+import { Organization } from '../organizations/entities/organization.entity';
+import { CreateOrganizationMemberDto } from '../organizations/dto/create-organization.dto';
 
 @Injectable()
 export class DevelopersService extends BaseService {
@@ -31,11 +34,7 @@ export class DevelopersService extends BaseService {
       await this.eventStore.appendEvent(
         id,
         DeveloperEventType.DeveloperSignedUpWithEmail,
-        { ...accountData, createdAt: new Date() },
-      );
-      this.eventEmitter.emit(
-        DeveloperEventType.DeveloperSignedUpWithEmail,
-        accountData,
+        { ...accountData, createdAt: new Date(), id },
       );
       return { id, ...accountData };
     } catch (error: any) {
@@ -47,14 +46,14 @@ export class DevelopersService extends BaseService {
   async findAccountByEmail(email: string) {
     return await this.prisma.developerAccount.findFirst({
       where: { email: { equals: email, mode: 'insensitive' } },
-      include: { _count: { select: { apps: true, memberships: true } } },
+      include: { _count: { select: { clientApps: true, memberships: true } } },
     });
   }
 
   async findAccountById(id: string) {
     return await this.prisma.developerAccount.findUnique({
       where: { id },
-      include: { _count: { select: { apps: true, memberships: true } } },
+      include: { _count: { select: { clientApps: true, memberships: true } } },
     });
   }
 
@@ -94,7 +93,7 @@ export class DevelopersService extends BaseService {
           const { name, password, email, id } =
             eventData as unknown as DeveloperSignupDto;
 
-          await this.prisma.developerAccount.create({
+          const accountData = await this.prisma.developerAccount.create({
             data: {
               createdAt: created,
               name,
@@ -107,10 +106,58 @@ export class DevelopersService extends BaseService {
               lastStreamId,
             },
           });
+          this.eventEmitter.emit(
+            DeveloperEventType.DeveloperSignedUpWithEmail,
+            { data: accountData, event: event.event },
+          );
+        }
+        break;
+      case DeveloperEventType.DeveloperRegisteredOrganization:
+        {
+          const { accountId, organizationId } =
+            eventData as unknown as CreateOrganizationMemberDto;
+          const orgMembership = await this.prisma.organizationMember.create({
+            data: {
+              accountId,
+              organizationId,
+              role: 'OWNER',
+            },
+            include: {
+              account: true,
+              organization: true,
+            },
+          });
+          this.eventEmitter.emit(
+            DeveloperEventType.DeveloperRegisteredOrganization,
+            { data: orgMembership, event: event.event },
+          );
         }
         break;
       default:
         break;
+    }
+  }
+
+  @OnEvent(OrganizationEventType.OrganizationRegistered)
+  async handleOrganizationRegisteredEvent(eventData: {
+    data: Organization;
+    event: EventData;
+  }) {
+    const {
+      data: { id: organizationId },
+      event: { metadata, id: eventId },
+    } = eventData;
+    const correlationId = (metadata as any)?.correlationId;
+    const developerId = (metadata as any)?.developerId;
+    try {
+      this.eventStore.appendEvent(
+        developerId,
+        DeveloperEventType.DeveloperRegisteredOrganization,
+        { accountId: developerId, organizationId },
+        { correlationId, developerId, causationId: eventId },
+      );
+    } catch (error: any) {
+      this.logger.error(error.message);
     }
   }
 }
