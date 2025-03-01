@@ -32,6 +32,7 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
       context.getHandler(),
     ]);
+    if (!roleNames || !roleNames.length) return true;
     const user = this.asyncStorageService.get<DeveloperAccount | Customer>(
       'user',
     );

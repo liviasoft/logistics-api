@@ -82,7 +82,7 @@ export class AuthController {
 
   @Get('/developer/me')
   @UseGuards(AuthGuard)
-  getLoggedInDeveloperDetails() {
+  LoggedInDeveloperDetails() {
     return {
       user: this.asyncStorageService.get('user'),
       auth: this.asyncStorageService.get('auth'),

@@ -10,12 +10,15 @@ import {
 import { ClientAppService } from './client-app.service';
 import { CreateClientAppDto } from './dto/create-client-app.dto';
 import { UpdateClientAppDto } from './dto/update-client-app.dto';
+import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
+import { FeatureFlagsList } from '../../common/constants';
 
 @Controller({ path: 'apps', version: '1' })
 export class ClientAppController {
   constructor(private readonly clientAppService: ClientAppService) {}
 
   @Post()
+  @FeatureFlags(FeatureFlagsList.REGISTER_CLIENT_APP)
   create(@Body() createClientAppDto: CreateClientAppDto) {
     return this.clientAppService.create(createClientAppDto);
   }
