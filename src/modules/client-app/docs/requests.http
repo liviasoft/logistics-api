@@ -3,7 +3,7 @@
 @appId = client_app_id
 
 # Create Client App
-POST {{baseUrl}}/api/v1/apps HTTP/1.1
+POST {{baseUrl}}/api/v1/apps/register HTTP/1.1
 Content-Type: application/json
 Authorization: {{Authorization}}
 

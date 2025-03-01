@@ -1,13 +1,15 @@
 {
   "rest-client.environmentVariables": {
     "$shared": {
-      "yourEmail": "yourEmail",
-      "yourPassword": "yourPassword"
+      "devEmail": "dev@gmail.com",
+      "devPassword": "",
+      "customerEmail": "customer@gmail.com",
+      "customerPassword": "",
     },
     "dev": {
       "baseUrl": "http://localhost:3000",
-      "token": "ey...",
-      "csrfToken": "",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZXZlbG9wZXItNjdiOTEyNjE2YTU4ZDhhNDAxM2YzZWQ4IiwiaWF0IjoxNzQwODM4ODA0LCJleHAiOjE3NDA4NDI0MDR9.b_lA70kgJ8g7DNYBN5SvyYsu2ZgSgD3c947BFWJwjp0",
+      "csrfToken": "67c31794be4fe0f58cc8bfa2",
     },
     "staging": {
       "baseUrl": "",

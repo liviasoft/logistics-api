@@ -15,6 +15,8 @@ import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
 import { DEVELOPER_RESOURCE, FeatureFlagsList } from '../../common/constants';
 import { AuthGuard } from '../auth/auth.guard';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
+import { Roles } from '../roles/roles.decorator';
+import { RolesList } from '../../common/constants/roles-list.constants';
 
 @Controller({ path: 'organizations', version: '1' })
 export class OrganizationController {
@@ -26,6 +28,7 @@ export class OrganizationController {
   @Post()
   @FeatureFlags(FeatureFlagsList.REGISTER_ORGANIZATION)
   @UseGuards(AuthGuard)
+  @Roles(RolesList.DEVELOPER)
   async registerOrganization(
     @Body() createOrganizationDto: CreateOrganizationDto,
   ) {

@@ -7,5 +7,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [forwardRef(() => AuthModule)],
   controllers: [OrganizationController],
   providers: [OrganizationService],
+  exports: [OrganizationService],
 })
 export class OrganizationModule {}

@@ -9,6 +9,7 @@ import { DevelopersService } from './modules/developers/developers.service';
 import { RolesGuard } from './modules/roles/roles.guard';
 import { AsyncStorageService } from './common/async-storage/async-storage.service';
 import { ConfigService } from '@nestjs/config';
+import { OrganizationService } from './modules/organizations/organization.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,8 +30,10 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000, async () => {
     const featureFlagService = app.get(FeatureFlagsService);
     const developersService = app.get(DevelopersService);
+    const organizationService = app.get(OrganizationService);
     featureFlagService.subscribeToEvents();
     developersService.subscribeToEvents();
+    organizationService.subscribeToEvents();
   });
 }
 bootstrap();

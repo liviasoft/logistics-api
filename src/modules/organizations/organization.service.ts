@@ -13,6 +13,8 @@ import { ResolvedEvent } from '@eventstore/db-client';
 import { OrganizationEventType } from '../../events/organization.events';
 import { OrgType } from '@prisma/client';
 
+let counter = 0;
+
 @Injectable()
 export class OrganizationService extends BaseService {
   private readonly logger = new Logger(OrganizationService.name, {
@@ -24,6 +26,26 @@ export class OrganizationService extends BaseService {
     private eventEmitter: EventEmitter2,
   ) {
     super();
+  }
+
+  async createOrganization(
+    organizationData: CreateOrganizationDto,
+    developerId: string,
+  ) {
+    const id = this.createResourceId(ORGANIZATION_RESOURCE);
+    try {
+      await this.eventStore.appendEvent(
+        id,
+        OrganizationEventType.OrganizationRegistered,
+        { ...organizationData, createdAt: new Date(), id },
+        { correlationId: id, developerId },
+      );
+      return this.findOrganizationById(id);
+    } catch (error: any) {
+      this.logger.error(error);
+      throw new BadRequestException(error.message);
+    }
+    return 'This action adds a new organization';
   }
 
   // Events
@@ -82,6 +104,8 @@ export class OrganizationService extends BaseService {
               },
             },
           });
+          counter += 1;
+          this.logger.log(`emit ${counter}`);
           this.eventEmitter.emit(OrganizationEventType.OrganizationRegistered, {
             data: organizationData,
             event: event.event,
@@ -92,31 +116,16 @@ export class OrganizationService extends BaseService {
         break;
     }
   }
-  async createOrganization(
-    organizationData: CreateOrganizationDto,
-    developerId: string,
-  ) {
-    const id = this.createResourceId(ORGANIZATION_RESOURCE);
-    try {
-      await this.eventStore.appendEvent(
-        id,
-        OrganizationEventType.OrganizationRegistered,
-        { ...organizationData, createdAt: new Date() },
-        { correlationId: id, developerId },
-      );
-      this.eventEmitter.emit(OrganizationEventType.OrganizationRegistered, {
-        organizationData,
-        developerId,
-      });
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new BadRequestException(error.message);
-    }
-    return 'This action adds a new organization';
+
+  async findAll() {
+    return await this.prisma.organization.findMany();
   }
 
-  findAll() {
-    return `This action returns all organization`;
+  async findOrganizationById(id: string) {
+    return await this.prisma.organization.findUnique({
+      where: { id },
+      include: { _count: { select: { clientApps: true, members: true } } },
+    });
   }
 
   findOne(id: number) {

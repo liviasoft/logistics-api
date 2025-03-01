@@ -41,11 +41,11 @@ export class AuthService extends BaseService {
 
   async getContextualUserAccounts(userId: string) {
     if (userId.startsWith(DEVELOPER_RESOURCE)) {
-      this.asyncStorageService.set(`${DEVELOPER_RESOURCE}Id`, true);
+      this.asyncStorageService.set(`${DEVELOPER_RESOURCE}Id`, userId);
       return await this.developersService.findAccountById(userId);
     }
     if (userId.startsWith(CUSTOMER_RESOURCE)) {
-      this.asyncStorageService.set(`${CUSTOMER_RESOURCE}Id`, true);
+      this.asyncStorageService.set(`${CUSTOMER_RESOURCE}Id`, userId);
       return await this.customerService.findAccountById(userId);
     }
     return null;

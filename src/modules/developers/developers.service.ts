@@ -15,6 +15,8 @@ import { OrganizationEventType } from '../../events/organization.events';
 import { Organization } from '../organizations/entities/organization.entity';
 import { CreateOrganizationMemberDto } from '../organizations/dto/create-organization.dto';
 
+let counter = 0;
+
 @Injectable()
 export class DevelopersService extends BaseService {
   private readonly logger = new Logger(DevelopersService.name, {
@@ -114,6 +116,8 @@ export class DevelopersService extends BaseService {
         break;
       case DeveloperEventType.DeveloperRegisteredOrganization:
         {
+          counter += 1;
+          this.logger.log(`handler ${counter}`);
           const { accountId, organizationId } =
             eventData as unknown as CreateOrganizationMemberDto;
           const orgMembership = await this.prisma.organizationMember.create({
@@ -127,6 +131,7 @@ export class DevelopersService extends BaseService {
               organization: true,
             },
           });
+
           this.eventEmitter.emit(
             DeveloperEventType.DeveloperRegisteredOrganization,
             { data: orgMembership, event: event.event },
@@ -143,6 +148,7 @@ export class DevelopersService extends BaseService {
     data: Organization;
     event: EventData;
   }) {
+    this.logger.log(eventData);
     const {
       data: { id: organizationId },
       event: { metadata, id: eventId },
