@@ -6,6 +6,9 @@ import { FeatureFlagsService } from './modules/feature-flags/feature-flags.servi
 import { FeatureFlagsGuard } from './modules/feature-flags/feature-flags.guard';
 import { PrismaService } from './datasources/prisma/prisma.service';
 import { DevelopersService } from './modules/developers/developers.service';
+import { RolesGuard } from './modules/roles/roles.guard';
+import { AsyncStorageService } from './common/async-storage/async-storage.service';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,8 +19,13 @@ async function bootstrap() {
   );
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
+  const asyncStorage = app.get(AsyncStorageService);
+  const configService = app.get(ConfigService);
   app.use(cookieParser());
-  app.useGlobalGuards(new FeatureFlagsGuard(reflector, prisma));
+  app.useGlobalGuards(
+    new FeatureFlagsGuard(reflector, prisma),
+    new RolesGuard(reflector, asyncStorage, configService),
+  );
   await app.listen(process.env.PORT ?? 3000, async () => {
     const featureFlagService = app.get(FeatureFlagsService);
     const developersService = app.get(DevelopersService);

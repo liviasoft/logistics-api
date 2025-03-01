@@ -73,6 +73,14 @@ export class OrganizationService extends BaseService {
               lastEventType,
               lastStreamId,
             },
+            include: {
+              _count: {
+                select: {
+                  clientApps: true,
+                  members: true,
+                },
+              },
+            },
           });
           this.eventEmitter.emit(OrganizationEventType.OrganizationRegistered, {
             data: organizationData,

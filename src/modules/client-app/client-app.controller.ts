@@ -11,7 +11,7 @@ import { ClientAppService } from './client-app.service';
 import { CreateClientAppDto } from './dto/create-client-app.dto';
 import { UpdateClientAppDto } from './dto/update-client-app.dto';
 
-@Controller('client-app')
+@Controller({ path: 'apps', version: '1' })
 export class ClientAppController {
   constructor(private readonly clientAppService: ClientAppService) {}
 
