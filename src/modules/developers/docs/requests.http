@@ -1,0 +1,42 @@
+# Variables
+@Authorization = Bearer {{token}}
+@developerId = developer_id
+
+# Create Developer Account
+POST {{baseUrl}}/api/v1/developers HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{}
+
+###
+
+# Get Developer Accounts
+GET {{baseUrl}}/api/v1/developers HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Get Developer Account Details
+GET {{baseUrl}}/api/v1/developers/{{developerId}} HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Update Developer Account Details
+PATCH {{baseUrl}}/api/v1/developers/{{developerId}} HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{}
+
+###
+
+# Delete Developer Account
+DELETE {{baseUrl}}/api/v1/developers/{{developerId}} HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+###

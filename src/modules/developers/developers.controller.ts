@@ -11,9 +11,10 @@ import { DevelopersService } from './developers.service';
 // import { CreateDeveloperDto } from './dto/create-developer.dto';
 // import { UpdateDeveloperDto } from './dto/update-developer.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
+import { FeatureFlagsList } from '../../common/constants';
 
 @Controller({ path: 'developers', version: '1' })
-@FeatureFlags('DEVELOPER_LOGIN')
+@FeatureFlags(FeatureFlagsList.DEVELOPER_LOGIN)
 export class DevelopersController {
   constructor(private readonly developersService: DevelopersService) {}
 

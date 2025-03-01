@@ -17,6 +17,7 @@ import { AuthGuard } from './auth.guard';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 import { Request, Response } from 'express';
 import { DeveloperRefreshTokenDto } from './dto/developer-refresh-token.dto';
+import { FeatureFlagsList } from '../../common/constants';
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -26,13 +27,13 @@ export class AuthController {
   ) {}
 
   @Post('/developer/signup')
-  @FeatureFlags('DEVELOPER_SIGNUP')
+  @FeatureFlags(FeatureFlagsList.DEVELOPER_SIGNUP)
   developerRegister(@Body() developerSignupData: DeveloperSignupDto) {
     return this.authService.developerSignup(developerSignupData);
   }
 
   @Post('/developer/login')
-  @FeatureFlags('DEVELOPER_LOGIN')
+  @FeatureFlags(FeatureFlagsList.DEVELOPER_LOGIN)
   async developerLogin(
     @Body() developerLoginData: DeveloperLoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -81,7 +82,7 @@ export class AuthController {
 
   @Get('/developer/me')
   @UseGuards(AuthGuard)
-  getLoggedInDeveloperDetails() {
+  LoggedInDeveloperDetails() {
     return {
       user: this.asyncStorageService.get('user'),
       auth: this.asyncStorageService.get('auth'),

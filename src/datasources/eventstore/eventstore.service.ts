@@ -22,8 +22,13 @@ export class EventstoreService implements OnModuleInit {
 
   async onModuleInit() {}
 
-  async appendEvent(streamName: string, eventType: string, data: any) {
-    const event = jsonEvent({ type: eventType, data });
+  async appendEvent(
+    streamName: string,
+    eventType: string,
+    data: any,
+    metadata?: any,
+  ) {
+    const event = jsonEvent({ type: eventType, data, metadata });
     return await this.client.appendToStream(streamName, event);
   }
 

@@ -1,6 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -15,21 +17,19 @@ export class AuthGuard implements CanActivate {
   });
   constructor(
     private readonly asyncStorageService: AsyncStorageService,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
 
   async canActivate(_: ExecutionContext) {
     const store = this.asyncStorageService.getStore();
     const auth = store.get('auth');
-    this.logger.log({ auth });
     if (!auth || !auth?.userId) throw new UnauthorizedException();
-
     try {
       const user = await this.authService.getContextualUserAccounts(
         auth.userId,
       );
       store.set('user', user);
-      this.logger.log({ user });
       return true;
     } catch (error: any) {
       this.logger.error(error);

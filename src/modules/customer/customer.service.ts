@@ -18,9 +18,9 @@ export class CustomerService extends BaseService {
   }
 
   async findAccountById(id: string) {
-    return this.prisma.appCustomer.findUnique({
+    return this.prisma.clientAppCustomer.findUnique({
       where: { id },
-      include: { _count: { select: { AppOrder: true } } },
+      include: { _count: { select: { clientAppOrder: true } } },
     });
   }
 

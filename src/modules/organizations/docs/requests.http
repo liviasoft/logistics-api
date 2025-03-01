@@ -1,0 +1,42 @@
+# Variables
+@Authorization = Bearer {{token}}
+@organizationId = organization_id
+
+# Create Organization
+POST {{baseUrl}}/api/v1/organizations HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{}
+
+###
+
+# Get Organizations
+GET {{baseUrl}}/api/v1/organizations HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Get Organization Details
+GET {{baseUrl}}/api/v1/organizations/{{organizationId}} HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Update Organization Details
+PATCH {{baseUrl}}/api/v1/organizations/{{organizationId}} HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{}
+
+###
+
+# Delete Organization
+DELETE {{baseUrl}}/api/v1/organizations/{{organizationId}} HTTP/1.1
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+###
