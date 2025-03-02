@@ -17,7 +17,10 @@ import { AuthGuard } from '../auth/auth.guard';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 import { Roles } from '../roles/roles.decorator';
 import { RolesList } from '../../common/constants/roles-list.constants';
+import { RolesGuard } from '../roles/roles.guard';
 
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(RolesList.DEVELOPER)
 @Controller({ path: 'organizations', version: '1' })
 export class OrganizationController {
   constructor(
@@ -25,14 +28,12 @@ export class OrganizationController {
     private readonly asyncStorageService: AsyncStorageService,
   ) {}
 
-  @Post()
+  @Post('/register')
   @FeatureFlags(FeatureFlagsList.REGISTER_ORGANIZATION)
-  @UseGuards(AuthGuard)
-  @Roles(RolesList.DEVELOPER)
   async registerOrganization(
     @Body() createOrganizationDto: CreateOrganizationDto,
   ) {
-    const developerId = await this.asyncStorageService.get<string>(
+    const developerId = this.asyncStorageService.get<string>(
       `${DEVELOPER_RESOURCE}Id`,
     );
     return this.organizationService.createOrganization(
@@ -42,8 +43,11 @@ export class OrganizationController {
   }
 
   @Get()
-  findAll() {
-    return this.organizationService.findAll();
+  findMyOrganizations() {
+    const developerId = this.asyncStorageService.get<string>(
+      `${DEVELOPER_RESOURCE}Id`,
+    );
+    return this.organizationService.findOrganizationsByMembership(developerId);
   }
 
   @Get(':id')

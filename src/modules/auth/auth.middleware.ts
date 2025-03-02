@@ -16,15 +16,12 @@ export class AuthMiddleware implements NestMiddleware {
     const store = this.asyncStorageService.getStore();
     const authorization = req.headers?.authorization;
     const token = authorization?.split(' ')[1];
-    this.logger.log('reached here');
     if (!token) {
-      this.logger.log('reached here - No token found');
       return next();
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
       store.set('auth', payload);
-      this.logger.log({ auth: store.get('auth') });
     } catch (error: any) {
       this.logger.error(error);
     }

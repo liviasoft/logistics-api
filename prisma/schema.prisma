@@ -81,6 +81,13 @@ model OrganizationMember {
   organizationId String
   joinedAt       DateTime @default(now())
 
+  revision      Int?    @default(0) @db.Integer
+  lastEventId   String?
+  lastEventType String?
+  lastStreamId  String?
+
+  updatedAt DateTime @default(now()) @updatedAt
+
   role         OrgRole          @default(DEVELOPER)
   account      DeveloperAccount @relation(fields: [accountId], references: [id])
   organization Organization     @relation(fields: [organizationId], references: [id])
@@ -91,20 +98,25 @@ model OrganizationMember {
 model ClientApp {
   id             String @id @default(cuid())
   name           String
-  creatorId      String
+  developerId    String
   organizationId String
+  clientId       String
+  clientSecret   String
 
   revision      Int?    @default(0) @db.Integer
   lastEventId   String?
   lastEventType String?
   lastStreamId  String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   customers    ClientAppCustomer[]
   featureFlags ClientAppFeatureFlag[]
   orders       ClientAppOrder[]
   packages     ClientAppPackage[]
 
-  creator      DeveloperAccount @relation(fields: [creatorId], references: [id])
+  developer    DeveloperAccount @relation(fields: [developerId], references: [id])
   organization Organization     @relation(fields: [organizationId], references: [id])
 }
 

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
@@ -23,12 +24,17 @@ import { PrismaService } from '../../datasources/prisma/prisma.service';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 import { CUSTOMER_RESOURCE, DEVELOPER_RESOURCE } from '../../common/constants';
 import { CustomerService } from '../customer/customer.service';
+import { CookieOptions, Request, Response } from 'express';
 
 @Injectable()
 export class AuthService extends BaseService {
   private readonly logger = new Logger(AuthService.name, {
     timestamp: true,
   });
+  private defaultCookieOptions: CookieOptions = {
+    httpOnly: true,
+    maxAge: 7 * TIME_PERIOD.DAY * MILLISECONDS,
+  };
   constructor(
     private readonly developersService: DevelopersService,
     private readonly customerService: CustomerService,
@@ -51,21 +57,38 @@ export class AuthService extends BaseService {
     return null;
   }
 
-  async developerSignup(developerSignupDto: DeveloperSignupDto) {
+  async developerSignup(developerSignupDto: DeveloperSignupDto, res: Response) {
     const { email, name: rawName, password: rawPassword } = developerSignupDto;
     const existingAccount =
       await this.developersService.findAccountByEmail(email);
-    if (existingAccount)
+    if (existingAccount) {
       throw new BadRequestException('Email already registered');
+    }
 
     try {
       const password = await bcrypt.hash(rawPassword, 10);
       const name = Case.capital(rawName);
       const accountDetails = { password, name, email };
+      const { id: userId } =
+        await this.developersService.createAccount(accountDetails);
+      const csrfToken = new ObjectId();
+      const { token: refreshToken } = await this.generateRefreshToken(
+        userId,
+        7,
+        'DAY',
+      );
+      const accessToken = await this.generateAccessToken({ userId });
+      res.cookie('refreshToken', refreshToken, this.defaultCookieOptions);
+      res.cookie('csrfToken', csrfToken, this.defaultCookieOptions);
       return this.formatResponse({
-        data: await this.developersService.createAccount(accountDetails),
-        statusCode: 201,
-        message: `Developer Account registered successfully`,
+        data: {
+          accessToken,
+          user: { name, email },
+          csrfToken,
+          refreshToken,
+        },
+        message: 'Account registered successfully',
+        statusCode: HttpStatus.OK,
       });
     } catch (error: any) {
       this.logger.error(error);
@@ -75,7 +98,7 @@ export class AuthService extends BaseService {
     }
   }
 
-  async developerLogin(developerLoginDto: DeveloperLoginDto) {
+  async developerLogin(developerLoginDto: DeveloperLoginDto, res: Response) {
     const { email, password } = developerLoginDto;
     const account = await this.developersService.findAccountByEmail(email);
     if (!account) throw new NotFoundException(`Invalid credentials`);
@@ -92,12 +115,27 @@ export class AuthService extends BaseService {
     // TODO: check device login
     const { id: userId } = data;
     const csrfToken = new ObjectId();
-    const refreshToken = await this.generateRefreshToken(userId, 7, 'DAY');
+    const { token: refreshToken } = await this.generateRefreshToken(
+      userId,
+      7,
+      'DAY',
+    );
     const accessToken = await this.generateAccessToken({ userId });
-    return { accessToken, user: data, csrfToken, refreshToken };
+    res.cookie('refreshToken', refreshToken, this.defaultCookieOptions);
+    res.cookie('csrfToken', csrfToken, this.defaultCookieOptions);
+    return this.formatResponse({
+      data: {
+        accessToken,
+        user: data,
+        csrfToken,
+        refreshToken,
+      },
+      message: 'Logged In Successfully',
+      statusCode: HttpStatus.OK,
+    });
   }
 
-  async developerRefreshAuth(userId: string, token: string) {
+  async developerRefreshAuth(userId: string, token: string, res: Response) {
     const account = await this.developersService.findAccountById(userId);
     if (!account) throw new NotFoundException(`Invalid credentials`);
     const validToken = await this.prisma.refreshToken.findFirst({
@@ -108,7 +146,6 @@ export class AuthService extends BaseService {
     if (!validToken) throw new BadRequestException('Invalid Refresh Token');
     let newToken = validToken;
     const {
-      password: _,
       lastEventId: __,
       lastEventType: ___,
       lastStreamId: ____,
@@ -123,7 +160,32 @@ export class AuthService extends BaseService {
     ) {
       newToken = await this.generateRefreshToken(userId, 7, 'DAY');
     }
-    return { accessToken, user: data, csrfToken, refreshToken: newToken };
+    res.cookie('refreshToken', newToken.token, this.defaultCookieOptions);
+    res.cookie('csrfToken', csrfToken, this.defaultCookieOptions);
+    return this.formatResponse({
+      data: {
+        accessToken,
+        user: data,
+        csrfToken,
+        refreshToken: newToken.token,
+      },
+      message: 'Auth Refreshed',
+      statusCode: HttpStatus.OK,
+    });
+  }
+
+  async developerLogout(req: Request, res: Response) {
+    const authorization = req.headers?.authorization;
+    const token = authorization?.split(' ')[1];
+    if (!token) {
+      throw new BadRequestException('You are not logged in');
+    }
+    res.clearCookie('refreshToken', { httpOnly: true });
+    res.clearCookie('csrfToken', { httpOnly: true });
+    return this.formatResponse({
+      message: 'Logged out',
+      statusCode: HttpStatus.OK,
+    });
   }
 
   async generateAccessToken(

@@ -6,11 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { FeatureFlagsService } from './feature-flags.service';
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
 import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
+import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { RolesList } from '../../common/constants/roles-list.constants';
 
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(RolesList.SUPER_ADMIN)
 @Controller({ path: 'feature-flags', version: '1' })
 export class FeatureFlagsController {
   constructor(private readonly featureFlagsService: FeatureFlagsService) {}

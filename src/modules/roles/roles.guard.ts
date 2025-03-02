@@ -28,6 +28,7 @@ export class RolesGuard implements CanActivate {
     private readonly configService: ConfigService,
   ) {}
   canActivate(context: ExecutionContext) {
+    this.logger.log('Reached Roles Guard');
     const roleNames = this.reflector.getAllAndMerge<string[]>(ROLES, [
       context.getClass(),
       context.getHandler(),

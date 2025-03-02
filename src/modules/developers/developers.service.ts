@@ -56,6 +56,9 @@ export class DevelopersService extends BaseService {
     return await this.prisma.developerAccount.findUnique({
       where: { id },
       include: { _count: { select: { clientApps: true, memberships: true } } },
+      omit: {
+        password: true,
+      },
     });
   }
 

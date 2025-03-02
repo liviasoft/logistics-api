@@ -11,16 +11,28 @@ import { ClientAppService } from './client-app.service';
 import { CreateClientAppDto } from './dto/create-client-app.dto';
 import { UpdateClientAppDto } from './dto/update-client-app.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
-import { FeatureFlagsList } from '../../common/constants';
+import { DEVELOPER_RESOURCE, FeatureFlagsList } from '../../common/constants';
+import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 
 @Controller({ path: 'apps', version: '1' })
 export class ClientAppController {
-  constructor(private readonly clientAppService: ClientAppService) {}
+  constructor(
+    private readonly clientAppService: ClientAppService,
+    private readonly asyncStorageService: AsyncStorageService,
+  ) {}
 
-  @Post()
+  @Post('/register')
   @FeatureFlags(FeatureFlagsList.REGISTER_CLIENT_APP)
   create(@Body() createClientAppDto: CreateClientAppDto) {
-    return this.clientAppService.create(createClientAppDto);
+    const developerId = this.asyncStorageService.get<string>(
+      `${DEVELOPER_RESOURCE}Id`,
+    );
+    // TODO: check if developer belongs to organization
+    // TODO: check if developer has appropriate permissions / role in org
+    return this.clientAppService.registerClientApp(
+      createClientAppDto,
+      developerId,
+    );
   }
 
   @Get()

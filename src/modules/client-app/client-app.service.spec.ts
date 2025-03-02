@@ -1,11 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientAppService } from './client-app.service';
+import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventstoreModule } from '../../datasources/eventstore/eventstore.module';
+import { PrismaModule } from '../../datasources/prisma/prisma.module';
 
 describe('ClientAppService', () => {
   let service: ClientAppService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule,
+        PrismaModule,
+        EventstoreModule,
+        EventEmitterModule.forRoot(),
+      ],
       providers: [ClientAppService],
     }).compile();
 

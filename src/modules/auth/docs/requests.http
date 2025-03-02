@@ -1,6 +1,8 @@
 # Variables
 @Authorization = Bearer {{token}}
 @userId = developer-67b912616a58d8a4013f3ed8
+@devEmail= techybanky@gmail.com
+@devPassword= Bankole1.
 
 # Developer Signup
 POST {{baseUrl}}/api/v1/auth/developer/signup HTTP/1.1
@@ -39,4 +41,13 @@ Content-Type: application/json
 GET {{baseUrl}}/api/v1/auth/developer/me HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
+
+###
+
+# Developer Logout
+
+GET {{baseUrl}}/api/v1/auth/developer/logout HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
 

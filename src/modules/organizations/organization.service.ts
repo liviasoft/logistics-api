@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { BaseService } from '../../common/base.service';
@@ -32,6 +37,9 @@ export class OrganizationService extends BaseService {
     organizationData: CreateOrganizationDto,
     developerId: string,
   ) {
+    if (await this.findOrganizationByName(organizationData.name)) {
+      throw new BadRequestException('Organization name is not available');
+    }
     const id = this.createResourceId(ORGANIZATION_RESOURCE);
     try {
       await this.eventStore.appendEvent(
@@ -40,12 +48,15 @@ export class OrganizationService extends BaseService {
         { ...organizationData, createdAt: new Date(), id },
         { correlationId: id, developerId },
       );
-      return this.findOrganizationById(id);
+      return this.formatResponse({
+        message: 'New Organization registered',
+        data: { id, ...organizationData },
+        statusCode: HttpStatus.CREATED,
+      });
     } catch (error: any) {
       this.logger.error(error);
       throw new BadRequestException(error.message);
     }
-    return 'This action adds a new organization';
   }
 
   // Events
@@ -121,9 +132,41 @@ export class OrganizationService extends BaseService {
     return await this.prisma.organization.findMany();
   }
 
+  async findOrganizationsByMembership(developerId: string) {
+    return this.formatResponse({
+      data: await this.prisma.organization.findMany({
+        where: {
+          members: {
+            some: {
+              accountId: developerId,
+            },
+          },
+        },
+        include: {
+          _count: { select: { clientApps: true, members: true } },
+          members: {
+            include: {
+              account: { select: { id: true, email: true, name: true } },
+            },
+          },
+          clientApps: true,
+        },
+      }),
+      message: 'Your organizations',
+      statusCode: HttpStatus.OK,
+    });
+  }
+
   async findOrganizationById(id: string) {
     return await this.prisma.organization.findUnique({
       where: { id },
+      include: { _count: { select: { clientApps: true, members: true } } },
+    });
+  }
+
+  async findOrganizationByName(name: string) {
+    return await this.prisma.organization.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' } },
       include: { _count: { select: { clientApps: true, members: true } } },
     });
   }

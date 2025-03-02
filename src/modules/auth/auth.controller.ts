@@ -5,7 +5,6 @@ import {
   UseGuards,
   Get,
   Res,
-  HttpStatus,
   Req,
   BadRequestException,
 } from '@nestjs/common';
@@ -28,56 +27,32 @@ export class AuthController {
 
   @Post('/developer/signup')
   @FeatureFlags(FeatureFlagsList.DEVELOPER_SIGNUP)
-  developerRegister(@Body() developerSignupData: DeveloperSignupDto) {
-    return this.authService.developerSignup(developerSignupData);
+  developerRegister(
+    @Body() developerSignupData: DeveloperSignupDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.developerSignup(developerSignupData, res);
   }
 
   @Post('/developer/login')
   @FeatureFlags(FeatureFlagsList.DEVELOPER_LOGIN)
   async developerLogin(
     @Body() developerLoginData: DeveloperLoginDto,
-    @Res({ passthrough: true }) response: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    const {
-      accessToken,
-      refreshToken: { token: refreshToken, expiresAt },
-      csrfToken,
-      user,
-    } = await this.authService.developerLogin(developerLoginData);
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      expires: expiresAt,
-    });
-    response.cookie('csrfToken', csrfToken);
-    return {
-      data: { accessToken, refreshToken, csrfToken, user },
-      message: 'Logged In Successfully',
-      statusCode: HttpStatus.OK,
-    };
+    return this.authService.developerLogin(developerLoginData, res);
   }
 
   @Post('/developer/refresh-token')
   async developerRefreshAuth(
     @Body() { userId }: DeveloperRefreshTokenDto,
     @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
-    const oldRefreshToken = request.cookies['refreshToken'];
-    if (!oldRefreshToken) throw new BadRequestException();
-    const {
-      accessToken,
-      refreshToken: { token: refreshToken, expiresAt },
-      csrfToken,
-      user,
-    } = await this.authService.developerRefreshAuth(userId, oldRefreshToken);
-    const cookieOptions = { httpOnly: true, expires: expiresAt };
-    response.cookie('refreshToken', refreshToken, cookieOptions);
-    response.cookie('csrfToken', csrfToken, cookieOptions);
-    return {
-      data: { accessToken, refreshToken, csrfToken, user },
-      message: 'Token Refreshed',
-      statusCode: HttpStatus.OK,
-    };
+    const token = request.cookies['refreshToken'];
+    if (!token)
+      throw new BadRequestException('Invalid or missing refresh token');
+    return await this.authService.developerRefreshAuth(userId, token, res);
   }
 
   @Get('/developer/me')
@@ -89,5 +64,13 @@ export class AuthController {
       isDeveloper: this.asyncStorageService.get('isDeveloper'),
       requestId: this.asyncStorageService.get('requestId'),
     };
+  }
+
+  @Get('/developer/logout')
+  LogoutDeveloper(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.developerLogout(req, res);
   }
 }

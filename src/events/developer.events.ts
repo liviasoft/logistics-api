@@ -14,6 +14,7 @@
 export enum DeveloperEventType {
   DeveloperSignedUpWithEmail = 'DeveloperSignedUpWithEmail',
   DeveloperRegisteredOrganization = 'DeveloperRegisteredOrganization',
+  DeveloperRegisteredClientApp = 'DeveloperRegisteredClientApp',
 }
 
 // export const DEVELOPER = 'developer' as const;
