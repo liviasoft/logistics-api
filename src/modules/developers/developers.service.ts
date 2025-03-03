@@ -14,6 +14,8 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { OrganizationEventType } from '../../events/organization.events';
 import { Organization } from '../organizations/entities/organization.entity';
 import { CreateOrganizationMemberDto } from '../organizations/dto/create-organization.dto';
+import { Prisma } from '@prisma/client';
+import { DeveloperAccountFiltersPaginated } from './types/developer-account.types';
 
 let counter = 0;
 
@@ -58,6 +60,36 @@ export class DevelopersService extends BaseService {
       include: { _count: { select: { clientApps: true, memberships: true } } },
       omit: {
         password: true,
+      },
+    });
+  }
+
+  async getDeveloperAccountsPaginated({
+    page = 1,
+    limit = this.defaultPaginationLimit,
+    filters = {},
+    orderBy = {},
+    includes = {},
+  }: DeveloperAccountFiltersPaginated) {
+    const [developerAccounts, total] = await this.prisma.$transaction([
+      this.prisma.developerAccount.findMany({
+        take: limit,
+        skip: (page - 1) * limit,
+        where: { ...filters },
+        orderBy,
+        include: this.getIncludes(includes),
+      }),
+      this.prisma.developerAccount.count({ where: filters }),
+    ]);
+    const { pages, prev, next } = this.paginate(total, limit, page);
+    return this.formatResponse({
+      data: {
+        data: developerAccounts,
+        total,
+        pages,
+        prev,
+        next,
+        meta: { filters, orderBy, includes, page, limit },
       },
     });
   }
@@ -168,5 +200,17 @@ export class DevelopersService extends BaseService {
     } catch (error: any) {
       this.logger.error(error.message);
     }
+  }
+
+  getIncludes(includes?: Prisma.DeveloperAccountInclude) {
+    const countIncludes: Prisma.DeveloperAccountInclude = {
+      _count: {
+        select: {
+          clientApps: true,
+          memberships: true,
+        },
+      },
+    };
+    return { ...countIncludes, ...includes };
   }
 }

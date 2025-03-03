@@ -1,7 +1,7 @@
 # Variables
 @Authorization = Bearer {{token}}
 @userId = developer-67b912616a58d8a4013f3ed8
-@devEmail= techybanky@gmail.com
+@devEmail= dev@gmail.com
 @devPassword= Bankole1.
 
 # Developer Signup

@@ -12,7 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
 import { AsyncStorageMiddleware } from './common/async-storage/async-storage.middleware';
-import { CustomerModule } from './modules/customer/customer.module';
+import { CustomerModule } from './modules/customers/customers.module';
 import { AsyncStorageModule } from './common/async-storage/async-storage.module';
 import { ClientAppModule } from './modules/client-app/client-app.module';
 import { OrganizationModule } from './modules/organizations/organization.module';

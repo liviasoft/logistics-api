@@ -10,6 +10,7 @@ import { DevelopersService } from './modules/developers/developers.service';
 // import { AsyncStorageService } from './common/async-storage/async-storage.service';
 // import { ConfigService } from '@nestjs/config';
 import { OrganizationService } from './modules/organizations/organization.service';
+import { ClientAppService } from './modules/client-app/client-app.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,20 +21,17 @@ async function bootstrap() {
   );
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);
-  // const asyncStorage = app.get(AsyncStorageService);
-  // const configService = app.get(ConfigService);
   app.use(cookieParser());
-  app.useGlobalGuards(
-    new FeatureFlagsGuard(reflector, prisma),
-    // new RolesGuard(reflector, asyncStorage, configService),
-  );
+  app.useGlobalGuards(new FeatureFlagsGuard(reflector, prisma));
   await app.listen(process.env.PORT ?? 3000, async () => {
     const featureFlagService = app.get(FeatureFlagsService);
     const developersService = app.get(DevelopersService);
     const organizationService = app.get(OrganizationService);
+    const clientAppService = app.get(ClientAppService);
     featureFlagService.subscribeToEvents();
     developersService.subscribeToEvents();
     organizationService.subscribeToEvents();
+    clientAppService.subscribeToEvents();
   });
 }
 bootstrap();

@@ -5,6 +5,8 @@ import { PrismaModule } from '../../datasources/prisma/prisma.module';
 import { EventstoreModule } from '../../datasources/eventstore/eventstore.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '../auth/auth.module';
 
 describe('ClientAppController', () => {
   let controller: ClientAppController;
@@ -12,6 +14,8 @@ describe('ClientAppController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
+        AuthModule,
+        ConfigModule,
         PrismaModule,
         EventstoreModule,
         AsyncStorageModule,

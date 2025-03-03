@@ -1,6 +1,6 @@
 # Variables
 @Authorization = Bearer {{token}}
-@organizationId = organization_id
+@organizationId = organization-67c316578dfc4a3141e96c87
 
 # Create Organization
 POST {{baseUrl}}/api/v1/organizations HTTP/1.1

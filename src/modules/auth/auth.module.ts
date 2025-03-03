@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
 import { AuthGuard } from './auth.guard';
 import { DevelopersModule } from '../developers/developers.module';
-import { CustomerModule } from '../customer/customer.module';
+import { CustomerModule } from '../customers/customers.module';
 
 @Module({
   imports: [

@@ -16,9 +16,8 @@ import {
 } from '../../common/constants';
 import { ResolvedEvent } from '@eventstore/db-client';
 import { OrganizationEventType } from '../../events/organization.events';
-import { OrgType } from '@prisma/client';
-
-let counter = 0;
+import { OrgType, Prisma } from '@prisma/client';
+import { OrganizationFiltersPaginated } from './types/organization.types';
 
 @Injectable()
 export class OrganizationService extends BaseService {
@@ -115,8 +114,6 @@ export class OrganizationService extends BaseService {
               },
             },
           });
-          counter += 1;
-          this.logger.log(`emit ${counter}`);
           this.eventEmitter.emit(OrganizationEventType.OrganizationRegistered, {
             data: organizationData,
             event: event.event,
@@ -171,6 +168,36 @@ export class OrganizationService extends BaseService {
     });
   }
 
+  async getOrganizationsPaginated({
+    page = 1,
+    limit = this.defaultPaginationLimit,
+    filters,
+    orderBy = { createdAt: 'desc' },
+    includes,
+  }: OrganizationFiltersPaginated) {
+    const [organizations, total] = await this.prisma.$transaction([
+      this.prisma.organization.findMany({
+        take: limit,
+        skip: (page - 1) * limit,
+        where: { ...filters },
+        orderBy,
+        include: this.getIncludes(includes),
+      }),
+      this.prisma.organization.count({ where: { ...filters } }),
+    ]);
+    const { pages, prev, next } = this.paginate(total, limit, page);
+    return this.formatResponse({
+      data: {
+        data: organizations,
+        total,
+        pages,
+        prev,
+        next,
+        meta: { filters, orderBy, includes, page, limit },
+      },
+    });
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} organization`;
   }
@@ -182,5 +209,17 @@ export class OrganizationService extends BaseService {
 
   remove(id: number) {
     return `This action removes a #${id} organization`;
+  }
+
+  getIncludes(includes?: Prisma.OrganizationInclude) {
+    const countIncludes: Prisma.OrganizationInclude = {
+      _count: {
+        select: {
+          clientApps: true,
+          members: true,
+        },
+      },
+    };
+    return { ...countIncludes, ...includes };
   }
 }

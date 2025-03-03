@@ -16,6 +16,10 @@ import {
 } from '../../common/constants';
 import { ClientAppEventType } from '../../events/clientApp.events';
 import { ResolvedEvent } from '@eventstore/db-client';
+import { ClientAppFiltersPaginated } from './types/client-app.types';
+import { Prisma } from '@prisma/client';
+import { generateRandomString } from '../../common/utils/helper-functions.utils';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ClientAppService extends BaseService {
@@ -26,6 +30,7 @@ export class ClientAppService extends BaseService {
     private readonly prisma: PrismaService,
     private readonly eventStore: EventstoreService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
   ) {
     super();
   }
@@ -89,8 +94,8 @@ export class ClientAppService extends BaseService {
         {
           const { name, id, organizationId, developerId } =
             eventData as unknown as CreateClientAppDto;
-          const clientId = '1234';
-          const clientSecret = '1234';
+          const clientId = `${this.configService.get('ENVIRONMENT')}_${generateRandomString(20, { uppercaseOnly: true })}`;
+          const clientSecret = `${this.configService.get('ENVIRONMENT')}_${generateRandomString(38, { alphanumeric: true })}`;
           const clientAppData = await this.prisma.clientApp.create({
             data: {
               createdAt,
@@ -126,12 +131,61 @@ export class ClientAppService extends BaseService {
         break;
     }
   }
-  findAll() {
-    return `This action returns all clientApp`;
+
+  async getClientAppsPaginated({
+    page = 1,
+    limit = this.defaultPaginationLimit,
+    filters = {},
+    orderBy = {},
+    includes = {},
+  }: ClientAppFiltersPaginated) {
+    const [clientApps, total] = await this.prisma.$transaction([
+      this.prisma.clientApp.findMany({
+        take: limit,
+        skip: (page - 1) * limit,
+        where: { ...filters },
+        orderBy,
+        include: this.getIncludes(includes),
+      }),
+      this.prisma.clientApp.count({
+        where: {
+          ...filters,
+        },
+      }),
+    ]);
+    const { pages, prev, next } = this.paginate(total, limit, page);
+    return this.formatResponse({
+      data: {
+        data: clientApps,
+        total,
+        pages,
+        prev,
+        next,
+        meta: { filters, orderBy, includes, page, limit },
+      },
+    });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} clientApp`;
+  }
+
+  async findClientAppById(id: string) {
+    return await this.prisma.clientApp.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            customers: true,
+            featureFlags: true,
+            orders: true,
+            packages: true,
+          },
+        },
+        developer: true,
+        organization: true,
+      },
+    });
   }
 
   update(id: number, updateClientAppDto: UpdateClientAppDto) {
@@ -141,5 +195,19 @@ export class ClientAppService extends BaseService {
 
   remove(id: number) {
     return `This action removes a #${id} clientApp`;
+  }
+
+  getIncludes(includes?: Prisma.ClientAppInclude) {
+    const countIncludes: Prisma.ClientAppInclude = {
+      _count: {
+        select: {
+          customers: true,
+          featureFlags: true,
+          orders: true,
+          packages: true,
+        },
+      },
+    };
+    return { ...countIncludes, ...includes };
   }
 }

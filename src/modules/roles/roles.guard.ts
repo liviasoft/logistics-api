@@ -13,7 +13,7 @@ import { ROLES } from './roles.decorator';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 import { ConfigService } from '@nestjs/config';
 import { DeveloperAccount } from '../developers/entities/developer.entity';
-import { Customer } from '../customer/entities/customer.entity';
+import { Customer } from '../customers/entities/customer.entity';
 import { RolesList } from '../../common/constants/roles-list.constants';
 import { CUSTOMER_RESOURCE, DEVELOPER_RESOURCE } from '../../common/constants';
 
@@ -33,12 +33,15 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
       context.getHandler(),
     ]);
-    if (!roleNames || !roleNames.length) return true;
     const user = this.asyncStorageService.get<DeveloperAccount | Customer>(
       'user',
     );
     if (!user) throw new UnauthorizedException();
-    if (user.email === this.configService.get('SUPERADMIN_EMAIL')) return true;
+    if (user.email === this.configService.get('SUPERADMIN_EMAIL')) {
+      this.asyncStorageService.set(RolesList.SUPER_ADMIN, true);
+      return true;
+    }
+    if (!roleNames || !roleNames.length) return true;
     const requiredRoles: { [key: string]: string } = {};
     roleNames.forEach((role) => {
       requiredRoles[role] = role;

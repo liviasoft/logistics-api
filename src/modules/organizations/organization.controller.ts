@@ -47,7 +47,10 @@ export class OrganizationController {
     const developerId = this.asyncStorageService.get<string>(
       `${DEVELOPER_RESOURCE}Id`,
     );
-    return this.organizationService.findOrganizationsByMembership(developerId);
+    const filters = this.asyncStorageService.get<boolean>(RolesList.SUPER_ADMIN)
+      ? {}
+      : { members: { some: { accountId: developerId } } };
+    return this.organizationService.getOrganizationsPaginated({ filters });
   }
 
   @Get(':id')

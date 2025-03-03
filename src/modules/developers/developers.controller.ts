@@ -1,6 +1,7 @@
 import {
   Controller,
-  // Get,
+  Get,
+  UseInterceptors,
   // Post,
   // Body,
   // Patch,
@@ -12,8 +13,10 @@ import { DevelopersService } from './developers.service';
 // import { UpdateDeveloperDto } from './dto/update-developer.dto';
 import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
 import { FeatureFlagsList } from '../../common/constants';
+import { DevelopersInterceptor } from './developers.interceptor';
 
 @Controller({ path: 'developers', version: '1' })
+@UseInterceptors(DevelopersInterceptor)
 @FeatureFlags(FeatureFlagsList.DEVELOPER_LOGIN)
 export class DevelopersController {
   constructor(private readonly developersService: DevelopersService) {}
@@ -23,10 +26,10 @@ export class DevelopersController {
   //   return this.developersService.create(createDeveloperDto);
   // }
 
-  // @Get()
-  // findAll() {
-  //   return this.developersService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.developersService.getDeveloperAccountsPaginated({});
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

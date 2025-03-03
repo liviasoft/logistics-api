@@ -9,8 +9,8 @@ Content-Type: application/json
 Authorization: {{Authorization}}
 
 {
-  "name": "",
-  "organizationId": ""
+  "name": "Test App",
+  "organizationId": "organization-67c316578dfc4a3141e96c87"
 }
 
 ###

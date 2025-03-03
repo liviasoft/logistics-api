@@ -6,14 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
-import { CustomerService } from './customer.service';
+import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CustomersInterceptor } from './customers.interceptor';
 
 @Controller({ path: 'customers', version: '1' })
-export class CustomerController {
-  constructor(private readonly customerService: CustomerService) {}
+@UseInterceptors(CustomersInterceptor)
+export class CustomersController {
+  constructor(private readonly customerService: CustomersService) {}
 
   @Post()
   create(@Body() createCustomerDto: CreateCustomerDto) {
@@ -25,21 +28,21 @@ export class CustomerController {
     return this.customerService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(':customerId')
+  findOne(@Param('customerId') id: string) {
     return this.customerService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch(':customerId')
   update(
-    @Param('id') id: string,
+    @Param('customerId') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
     return this.customerService.update(+id, updateCustomerDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(':customerId')
+  remove(@Param('customerId') id: string) {
     return this.customerService.remove(+id);
   }
 }

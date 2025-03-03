@@ -7,7 +7,7 @@ import { PrismaModule } from '../../datasources/prisma/prisma.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevelopersModule } from '../developers/developers.module';
 import { JwtModule } from '@nestjs/jwt';
-import { CustomerModule } from '../customer/customer.module';
+import { CustomerModule } from '../customers/customers.module';
 
 describe('AuthController', () => {
   let controller: AuthController;

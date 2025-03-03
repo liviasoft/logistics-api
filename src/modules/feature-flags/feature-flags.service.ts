@@ -38,6 +38,10 @@ export class FeatureFlagsService extends BaseService {
     });
   }
 
+  async findFeatureFlagById(id: string) {
+    return this.prisma.featureFlag.findUnique({ where: { id } });
+  }
+
   async findById(id: string) {
     return this.formatResponse({
       data: await this.prisma.featureFlag.findUnique({ where: { id } }),

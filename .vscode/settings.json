@@ -3,8 +3,8 @@
     "$shared": {},
     "dev": {
       "baseUrl": "http://localhost:3000",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZXZlbG9wZXItNjdiOTE3MDhiYTllYTE3NGRjNjY3MTgzIiwiaWF0IjoxNzQwOTM4MjQ4LCJleHAiOjE3NDA5NDE4NDh9.UyjewKUvjFYZ5Ji90EM-ME-xCZcMUG9C2rujMe7anYE",
-      "csrfToken": "67c49c08cce519549220e1ff",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZXZlbG9wZXItNjdiOTEyNjE2YTU4ZDhhNDAxM2YzZWQ4IiwiaWF0IjoxNzQwOTg2ODc5LCJleHAiOjE3NDA5OTA0Nzl9.-tzk3TWfj4sllvMgVTt-y6sou531y4DN30uXk_opEZo",
+      "csrfToken": "67c559ff57433d7bcd16f59a",
     },
     "staging": {
       "baseUrl": "",

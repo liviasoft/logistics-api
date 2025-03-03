@@ -23,7 +23,7 @@ import {
 import { PrismaService } from '../../datasources/prisma/prisma.service';
 import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
 import { CUSTOMER_RESOURCE, DEVELOPER_RESOURCE } from '../../common/constants';
-import { CustomerService } from '../customer/customer.service';
+import { CustomersService } from '../customers/customers.service';
 import { CookieOptions, Request, Response } from 'express';
 
 @Injectable()
@@ -37,7 +37,7 @@ export class AuthService extends BaseService {
   };
   constructor(
     private readonly developersService: DevelopersService,
-    private readonly customerService: CustomerService,
+    private readonly customerService: CustomersService,
     private readonly asyncStorageService: AsyncStorageService,
     private prisma: PrismaService,
     private jwtService: JwtService,

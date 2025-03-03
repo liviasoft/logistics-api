@@ -6,8 +6,8 @@ import { AsyncStorageService } from '../../common/async-storage/async-storage.se
 import { PrismaService } from '../../datasources/prisma/prisma.service';
 
 @Injectable()
-export class CustomerService extends BaseService {
-  private readonly logger = new Logger(CustomerService.name, {
+export class CustomersService extends BaseService {
+  private readonly logger = new Logger(CustomersService.name, {
     timestamp: true,
   });
   constructor(
