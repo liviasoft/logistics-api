@@ -7,6 +7,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
+import { OrganizationModule } from '../organizations/organization.module';
 
 describe('ClientAppController', () => {
   let controller: ClientAppController;
@@ -20,6 +21,7 @@ describe('ClientAppController', () => {
         EventstoreModule,
         AsyncStorageModule,
         EventEmitterModule.forRoot(),
+        OrganizationModule,
       ],
       controllers: [ClientAppController],
       providers: [ClientAppService],

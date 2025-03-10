@@ -12,3 +12,15 @@ export type OrganizationFilters = {
 export type OrganizationFiltersPaginated = Partial<
   OrganizationFilters & PaginationFilter
 >;
+
+export type OrganizationMemberFilters = {
+  filters?: Prisma.OrganizationMemberWhereInput;
+  orderBy?:
+    | Prisma.OrganizationMemberOrderByWithRelationInput
+    | Prisma.OrganizationMemberOrderByWithRelationInput[];
+  includes?: Prisma.OrganizationMemberInclude;
+};
+
+export type OrganizationMemberFiltersPaginated = Partial<
+  OrganizationMemberFilters & PaginationFilter
+>;

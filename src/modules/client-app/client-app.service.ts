@@ -20,6 +20,7 @@ import { ClientAppFiltersPaginated } from './types/client-app.types';
 import { Prisma } from '@prisma/client';
 import { generateRandomString } from '../../common/utils/helper-functions.utils';
 import { ConfigService } from '@nestjs/config';
+import { ParsedQs } from 'qs';
 
 @Injectable()
 export class ClientAppService extends BaseService {
@@ -197,17 +198,41 @@ export class ClientAppService extends BaseService {
     return `This action removes a #${id} clientApp`;
   }
 
-  getIncludes(includes?: Prisma.ClientAppInclude) {
-    const countIncludes: Prisma.ClientAppInclude = {
-      _count: {
-        select: {
-          customers: true,
-          featureFlags: true,
-          orders: true,
-          packages: true,
-        },
-      },
+  formatQueryParams(query: ParsedQs) {
+    const filters: Prisma.ClientAppWhereInput = {};
+    const includes: Prisma.ClientAppInclude = {};
+    const orderBy: Prisma.ClientAppOrderByWithRelationInput = {
+      createdAt: 'desc',
     };
+    const OR: { [key: string]: any }[] = [];
+    const AND: { [key: string]: any }[] = [];
+    const limit =
+      parseInt(query.limit as string) || this.defaultPaginationLimit;
+    const page = parseInt(query.page as string) || 1;
+    for (const key in query) {
+      if (key === 'q') {
+        OR.push({
+          name: { contains: query[key] as string, mode: 'insensitive' },
+        });
+      }
+      if (key === 'developerId' || key === 'organizationId') {
+        AND.push({ [key]: query[key] });
+      }
+      if (key === 'include') {
+        const includeItems = (query[key] as string).split(',');
+        includeItems.forEach((item) => {
+          if (item === 'organization') includes.organization = true;
+          if (item === 'developer') includes.developer = true;
+        });
+      }
+    }
+    if (AND.length) filters.AND = AND;
+    if (OR.length) filters.OR = OR;
+    return { filters, page, limit, orderBy, includes };
+  }
+
+  getIncludes(includes?: Prisma.ClientAppInclude) {
+    const countIncludes: Prisma.ClientAppInclude = { _count: true };
     return { ...countIncludes, ...includes };
   }
 }

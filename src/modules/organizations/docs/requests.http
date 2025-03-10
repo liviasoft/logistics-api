@@ -15,7 +15,7 @@ Authorization: {{Authorization}}
 ###
 
 # Get Organizations
-GET {{baseUrl}}/api/v1/organizations HTTP/1.1
+GET {{baseUrl}}/api/v1/organizations?q=org&type=INDIVIDUAL HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
 
@@ -23,6 +23,13 @@ Authorization: {{Authorization}}
 
 # Get Organization Details
 GET {{baseUrl}}/api/v1/organizations/{{organizationId}} HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Get Organization Members
+GET {{baseUrl}}/api/v1/organizations/{{organizationId}}/members HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
 

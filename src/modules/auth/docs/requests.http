@@ -1,8 +1,8 @@
 # Variables
 @Authorization = Bearer {{token}}
-@userId = developer-67b912616a58d8a4013f3ed8
-@devEmail= dev@gmail.com
-@devPassword= Bankole1.
+@userId = developer-67b91708ba9ea174dc667183
+@devEmail= your@email.com
+@devPassword= password
 
 # Developer Signup
 POST {{baseUrl}}/api/v1/auth/developer/signup HTTP/1.1

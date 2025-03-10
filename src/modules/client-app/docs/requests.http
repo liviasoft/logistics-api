@@ -16,7 +16,7 @@ Authorization: {{Authorization}}
 ###
 
 # Get Client Apps
-GET {{baseUrl}}/api/v1/apps HTTP/1.1
+GET {{baseUrl}}/api/v1/apps?q=test&include=developer,organization HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
 

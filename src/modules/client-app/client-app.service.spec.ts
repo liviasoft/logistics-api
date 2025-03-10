@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventstoreModule } from '../../datasources/eventstore/eventstore.module';
 import { PrismaModule } from '../../datasources/prisma/prisma.module';
+import { OrganizationModule } from '../organizations/organization.module';
 
 describe('ClientAppService', () => {
   let service: ClientAppService;
@@ -15,6 +16,7 @@ describe('ClientAppService', () => {
         PrismaModule,
         EventstoreModule,
         EventEmitterModule.forRoot(),
+        OrganizationModule,
       ],
       providers: [ClientAppService],
     }).compile();
