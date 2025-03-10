@@ -143,7 +143,7 @@ export class FeatureFlagsService extends BaseService {
     try {
       await this.eventStore.appendEvent(
         getFeatureFlagStreamName(),
-        FeatureFlagEventType.FeatureFlagEdited,
+        FeatureFlagEventType.FeatureFlagRemoved,
         { id },
       );
       return this.formatResponse({
