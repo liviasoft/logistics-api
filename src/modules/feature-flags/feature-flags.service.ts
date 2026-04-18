@@ -15,6 +15,7 @@ import {
 } from '../../events/featureFlag.events';
 import { AllStreamResolvedEvent, ResolvedEvent } from '@eventstore/db-client';
 import { BaseService } from '../../common/base.service';
+import { FEATURE_FLAG_RESOURCE } from '../../common/constants';
 
 @Injectable()
 export class FeatureFlagsService extends BaseService {
@@ -30,16 +31,28 @@ export class FeatureFlagsService extends BaseService {
 
   // Read
   async findAll() {
-    return await this.prisma.featureFlag.findMany();
+    return this.formatResponse({
+      data: await this.prisma.featureFlag.findMany({
+        orderBy: { createdAt: 'desc' },
+      }),
+    });
+  }
+
+  async findFeatureFlagById(id: string) {
+    return this.prisma.featureFlag.findUnique({ where: { id } });
   }
 
   async findById(id: string) {
-    return await this.prisma.featureFlag.findUnique({ where: { id } });
+    return this.formatResponse({
+      data: await this.prisma.featureFlag.findUnique({ where: { id } }),
+    });
   }
 
   async findByName(name: string) {
-    return await this.prisma.featureFlag.findFirst({
-      where: { name: { mode: 'insensitive', equals: name } },
+    return this.formatResponse({
+      data: await this.prisma.featureFlag.findFirst({
+        where: { name: { mode: 'insensitive', equals: name } },
+      }),
     });
   }
 
@@ -60,20 +73,24 @@ export class FeatureFlagsService extends BaseService {
     }
 
     try {
+      const id = this.createResourceId(FEATURE_FLAG_RESOURCE);
       await this.eventStore.appendEvent(
         getFeatureFlagStreamName(),
         FeatureFlagEventType.FeatureFlagRegistered,
         {
-          id: this.createResourceId('feature_flag'),
+          id,
           ...createFeatureFlagDto,
           createdAt: new Date(),
         },
       );
+      return this.formatResponse({
+        data: { id, ...createFeatureFlagDto },
+        message: 'Feature Flag Registered',
+      });
     } catch (error) {
       this.logger.error(error);
       throw new ServiceUnavailableException('Error connecting to EventStoreDB');
     }
-    return 'This action adds a new featureFlag';
   }
 
   async update(id: string, data: UpdateFeatureFlagDto) {
@@ -85,10 +102,14 @@ export class FeatureFlagsService extends BaseService {
         FeatureFlagEventType.FeatureFlagEdited,
         { id, ...data, updatedAt: new Date() },
       );
+      return this.formatResponse({
+        data: { id, ...ff, updatedAt: new Date() },
+        message: 'Feature Flag updated',
+      });
     } catch (error: any) {
       this.logger.error(error);
+      throw new ServiceUnavailableException('Error updating Feature Flag');
     }
-    return `This action updates a #${id} featureFlag`;
   }
 
   async toggle(id: string) {
@@ -106,11 +127,14 @@ export class FeatureFlagsService extends BaseService {
           updatedAt: new Date(),
         },
       );
+      return this.formatResponse({
+        data: { ...ff, id, enabled: !ff.enabled },
+        message: 'Feature Flag Toggled',
+      });
     } catch (error: any) {
       this.logger.error(error);
-      throw new ServiceUnavailableException();
+      throw new ServiceUnavailableException('Error toggling feature flag');
     }
-    return `${id} toggled : ${!ff.enabled} `;
   }
 
   async remove(id: string) {
@@ -119,13 +143,17 @@ export class FeatureFlagsService extends BaseService {
     try {
       await this.eventStore.appendEvent(
         getFeatureFlagStreamName(),
-        FeatureFlagEventType.FeatureFlagEdited,
+        FeatureFlagEventType.FeatureFlagRemoved,
         { id },
       );
+      return this.formatResponse({
+        data: { ...ff, id },
+        message: 'Feature flag removed',
+      });
     } catch (error: any) {
       this.logger.error(error);
+      throw new ServiceUnavailableException('Error deleting feature flag');
     }
-    return `This action removes a #${id} featureFlag`;
   }
 
   // Events
@@ -152,7 +180,6 @@ export class FeatureFlagsService extends BaseService {
   }
 
   async handleStreamEvents(event: ResolvedEvent) {
-    this.logger.log({ event });
     const {
       created,
       data: eventData,

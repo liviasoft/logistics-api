@@ -1,0 +1,65 @@
+{
+  "validation": {
+    "required": "{field} is required",
+    "invalid": "{field} is invalid",
+    "tooLong": "{field} must not exceed {max} characters",
+    "tooShort": "{field} must be at least {min} characters",
+    "email": "Please provide a valid email address",
+    "number": "{field} must be a number",
+    "boolean": "{field} must be true or false"
+  },
+  "auth": {
+    "loginSuccess": "Logged in successfully",
+    "logoutSuccess": "Logged out successfully",
+    "registerSuccess": "Account created successfully",
+    "refreshSuccess": "Token refreshed",
+    "invalidCredentials": "Invalid credentials",
+    "emailTaken": "Email already registered",
+    "accountDeactivated": "Account is deactivated",
+    "unauthorized": "You are not authorised to perform this action",
+    "tokenExpired": "Your session has expired. Please log in again"
+  },
+  "users": {
+    "notFound": "User not found",
+    "updateSuccess": "Profile updated successfully",
+    "deleteSuccess": "Account deleted"
+  },
+  "preferences": {
+    "updateSuccess": "Preferences updated",
+    "resetSuccess": "Preferences reset to defaults"
+  },
+  "payments": {
+    "notFound": "Payment not found",
+    "createSuccess": "Payment created",
+    "captureSuccess": "Payment captured",
+    "cancelSuccess": "Payment cancelled",
+    "refundSuccess": "Refund initiated",
+    "unknownProvider": "Unknown payment provider: {provider}"
+  },
+  "notifications": {
+    "sentSuccess": "Notification sent",
+    "notFound": "Notification not found"
+  },
+  "storage": {
+    "uploadSuccess": "File uploaded successfully",
+    "deleteSuccess": "File deleted",
+    "notFound": "File not found",
+    "tooLarge": "File exceeds the maximum allowed size of {max}MB",
+    "mimeNotAllowed": "File type {type} is not allowed"
+  },
+  "settings": {
+    "updateSuccess": "Setting updated",
+    "resetSuccess": "Setting reset to default",
+    "notFound": "Setting key not found"
+  },
+  "webhooks": {
+    "subscriptionCreated": "Webhook subscription created",
+    "subscriptionDeleted": "Webhook subscription deleted"
+  },
+  "general": {
+    "notFound": "Resource not found",
+    "badRequest": "Invalid request",
+    "serverError": "An unexpected error occurred. Please try again later",
+    "maintenanceMode": "The service is currently under maintenance. Please try again shortly"
+  }
+}

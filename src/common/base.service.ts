@@ -2,6 +2,8 @@ import { ObjectId } from 'bson';
 import { Case } from 'change-case-all';
 
 export abstract class BaseService {
+  public readonly defaultPaginationLimit: number = 20;
+
   createResourceId(resourceName: string) {
     return `${Case.snake(resourceName)}-${new ObjectId().toString()}`;
   }

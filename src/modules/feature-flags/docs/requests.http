@@ -1,18 +1,30 @@
 # Variables
 @Authorization = Bearer {{token}}
-@featureFlagId = feature_flag_id
+@featureFlagId = feature_flag-67b2339edc03fb3dc55e9e74
 
 # Create Feature Flag
 POST {{baseUrl}}/api/v1/feature-flags HTTP/1.1
 Content-Type: application/json
 Authorization: {{Authorization}}
 
-{}
+{
+  "name": "REGISTER_CLIENT_APP",
+  "description": "Allows a developer to register a client application",
+  "errorMessage": "Client App registration is currently disabled",
+  "enabled": false
+}
 
 ###
 
 # Get Feature Flags
 GET {{baseUrl}}/api/v1/feature-flags HTTP/1.1
+Accept: application/json
+Authorization: {{Authorization}}
+
+###
+
+# Toggle Feature Flag
+PATCH {{baseUrl}}/api/v1/feature-flags/{{featureFlagId}}/toggle HTTP/1.1
 Accept: application/json
 Authorization: {{Authorization}}
 

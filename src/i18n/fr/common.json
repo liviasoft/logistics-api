@@ -1,0 +1,65 @@
+{
+  "validation": {
+    "required": "{field} est requis",
+    "invalid": "{field} est invalide",
+    "tooLong": "{field} ne doit pas dépasser {max} caractères",
+    "tooShort": "{field} doit contenir au moins {min} caractères",
+    "email": "Veuillez fournir une adresse e-mail valide",
+    "number": "{field} doit être un nombre",
+    "boolean": "{field} doit être vrai ou faux"
+  },
+  "auth": {
+    "loginSuccess": "Connexion réussie",
+    "logoutSuccess": "Déconnexion réussie",
+    "registerSuccess": "Compte créé avec succès",
+    "refreshSuccess": "Jeton rafraîchi",
+    "invalidCredentials": "Identifiants invalides",
+    "emailTaken": "Cette adresse e-mail est déjà enregistrée",
+    "accountDeactivated": "Ce compte est désactivé",
+    "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action",
+    "tokenExpired": "Votre session a expiré. Veuillez vous reconnecter"
+  },
+  "users": {
+    "notFound": "Utilisateur introuvable",
+    "updateSuccess": "Profil mis à jour avec succès",
+    "deleteSuccess": "Compte supprimé"
+  },
+  "preferences": {
+    "updateSuccess": "Préférences mises à jour",
+    "resetSuccess": "Préférences réinitialisées aux valeurs par défaut"
+  },
+  "payments": {
+    "notFound": "Paiement introuvable",
+    "createSuccess": "Paiement créé",
+    "captureSuccess": "Paiement capturé",
+    "cancelSuccess": "Paiement annulé",
+    "refundSuccess": "Remboursement initié",
+    "unknownProvider": "Fournisseur de paiement inconnu : {provider}"
+  },
+  "notifications": {
+    "sentSuccess": "Notification envoyée",
+    "notFound": "Notification introuvable"
+  },
+  "storage": {
+    "uploadSuccess": "Fichier téléversé avec succès",
+    "deleteSuccess": "Fichier supprimé",
+    "notFound": "Fichier introuvable",
+    "tooLarge": "Le fichier dépasse la taille maximale autorisée de {max} Mo",
+    "mimeNotAllowed": "Le type de fichier {type} n'est pas autorisé"
+  },
+  "settings": {
+    "updateSuccess": "Paramètre mis à jour",
+    "resetSuccess": "Paramètre réinitialisé",
+    "notFound": "Clé de paramètre introuvable"
+  },
+  "webhooks": {
+    "subscriptionCreated": "Abonnement webhook créé",
+    "subscriptionDeleted": "Abonnement webhook supprimé"
+  },
+  "general": {
+    "notFound": "Ressource introuvable",
+    "badRequest": "Requête invalide",
+    "serverError": "Une erreur inattendue s'est produite. Veuillez réessayer",
+    "maintenanceMode": "Le service est en cours de maintenance. Veuillez réessayer ultérieurement"
+  }
+}

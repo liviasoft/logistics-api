@@ -1,16 +1,16 @@
-import { IsBoolean, IsString } from 'class-validator';
-import { IsValidKeyName } from '../../../common/validators';
+import { IsBoolean } from 'class-validator';
+import { IsNotEmptyString, IsValidKeyName } from '../../../common/validators';
 
 export class CreateFeatureFlagDto {
   id?: string;
 
-  @IsValidKeyName('name')
+  @IsValidKeyName('Name')
   name: string;
 
-  @IsString()
+  @IsNotEmptyString('Description')
   description?: string;
 
-  @IsString()
+  @IsNotEmptyString('Error Message')
   errorMessage?: string;
 
   @IsBoolean()

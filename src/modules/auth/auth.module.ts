@@ -1,21 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { DevelopersService } from '../developers/developers.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CustomerService } from '../customer/customer.service';
-import { AsyncStorageModule } from '../../common/async-storage/async-storage.module';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    AsyncStorageModule,
+    UsersModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (config) => ({
+      useFactory: async (config: ConfigService) => ({
         secret: config.get('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '15m' },
         global: true,
       }),
       global: true,
@@ -23,7 +21,7 @@ import { AuthGuard } from './auth.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DevelopersService, CustomerService, AuthGuard],
-  exports: [AuthService, AuthGuard],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard, JwtModule],
 })
 export class AuthModule {}

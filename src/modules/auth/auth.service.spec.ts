@@ -6,7 +6,8 @@ import { EventstoreModule } from '../../datasources/eventstore/eventstore.module
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevelopersModule } from '../developers/developers.module';
 import { JwtModule } from '@nestjs/jwt';
-import { CustomerModule } from '../customer/customer.module';
+import { CustomerModule } from '../customers/customers.module';
+import { ClientAppModule } from '../client-app/client-app.module';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -20,6 +21,7 @@ describe('AuthService', () => {
         EventEmitterModule.forRoot(),
         DevelopersModule,
         CustomerModule,
+        ClientAppModule,
         JwtModule,
       ],
       providers: [AuthService],
