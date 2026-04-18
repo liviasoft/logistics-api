@@ -1,6 +1,6 @@
 # Variables
 @Authorization = Bearer {{token}}
-@featureFlagId = feature_flag-67c499c615a96f78da475250
+@featureFlagId = feature_flag-67b2339edc03fb3dc55e9e74
 
 # Create Feature Flag
 POST {{baseUrl}}/api/v1/feature-flags HTTP/1.1

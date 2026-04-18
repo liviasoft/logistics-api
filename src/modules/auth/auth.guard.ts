@@ -1,39 +1,36 @@
 import {
   CanActivate,
   ExecutionContext,
-  forwardRef,
-  Inject,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
-import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private readonly logger = new Logger(AuthGuard.name, {
-    timestamp: true,
-  });
-  constructor(
-    private readonly asyncStorageService: AsyncStorageService,
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
-  async canActivate(_: ExecutionContext) {
-    const store = this.asyncStorageService.getStore();
-    const auth = store.get('auth');
-    if (!auth || !auth?.userId) throw new UnauthorizedException();
-    try {
-      const user = await this.authService.getContextualUserAccounts(
-        auth.userId,
-      );
-      store.set('user', user);
-      return true;
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
+      throw new UnauthorizedException('Missing authentication token');
     }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      // Attach user to request for use in controllers
+      (request as Request & { user: unknown }).user = payload;
+      return true;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

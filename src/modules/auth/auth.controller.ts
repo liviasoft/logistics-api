@@ -1,76 +1,79 @@
 import {
   Controller,
   Post,
-  Body,
-  UseGuards,
   Get,
+  Body,
   Res,
   Req,
-  BadRequestException,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { DeveloperSignupDto } from './dto/developer-signup.dto';
-import { FeatureFlags } from '../feature-flags/feature-flags.decorator';
-import { DeveloperLoginDto } from './dto/developer-login.dto';
-import { AuthGuard } from './auth.guard';
-import { AsyncStorageService } from '../../common/async-storage/async-storage.service';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { DeveloperRefreshTokenDto } from './dto/developer-refresh-token.dto';
-import { FeatureFlagsList } from '../../common/constants';
+import { AuthService } from './auth.service';
+import { SignupDto, LoginDto } from './dto';
+import { AuthGuard } from './auth.guard';
 
+@ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly asyncStorageService: AsyncStorageService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('/developer/signup')
-  @FeatureFlags(FeatureFlagsList.DEVELOPER_SIGNUP)
-  developerRegister(
-    @Body() developerSignupData: DeveloperSignupDto,
+  @Post('signup')
+  @ApiOperation({ summary: 'Register a new user account' })
+  async signup(
+    @Body() dto: SignupDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.developerSignup(developerSignupData, res);
+    return this.authService.signup(dto, res);
   }
 
-  @Post('/developer/login')
-  @FeatureFlags(FeatureFlagsList.DEVELOPER_LOGIN)
-  async developerLogin(
-    @Body() developerLoginData: DeveloperLoginDto,
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  async login(
+    @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.developerLogin(developerLoginData, res);
+    return this.authService.login(dto, res);
   }
 
-  @Post('/developer/refresh-token')
-  async developerRefreshAuth(
-    @Body() { userId }: DeveloperRefreshTokenDto,
-    @Req() request: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const token = request.cookies['refreshToken'];
-    if (!token)
-      throw new BadRequestException('Invalid or missing refresh token');
-    return await this.authService.developerRefreshAuth(userId, token, res);
-  }
-
-  @Get('/developer/me')
-  @UseGuards(AuthGuard)
-  LoggedInDeveloperDetails() {
-    return {
-      user: this.asyncStorageService.get('user'),
-      auth: this.asyncStorageService.get('auth'),
-      isDeveloper: this.asyncStorageService.get('isDeveloper'),
-      requestId: this.asyncStorageService.get('requestId'),
-    };
-  }
-
-  @Get('/developer/logout')
-  LogoutDeveloper(
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
+  async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.developerLogout(req, res);
+    const refreshToken = req.cookies?.refreshToken;
+    const userId = (req as Request & { user?: { sub: string } }).user?.sub;
+
+    if (!refreshToken || !userId) {
+      return this.authService.logout('', res);
+    }
+
+    return this.authService.refresh(userId, refreshToken, res);
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout and revoke refresh tokens' })
+  async logout(
+    @Req() req: Request & { user?: { sub: string } },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userId = req.user?.sub || '';
+    return this.authService.logout(userId, res);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  async me(@Req() req: Request & { user?: { sub: string } }) {
+    return this.authService.me(req.user?.sub || '');
   }
 }

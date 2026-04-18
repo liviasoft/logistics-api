@@ -8,6 +8,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { DevelopersModule } from '../developers/developers.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CustomerModule } from '../customers/customers.module';
+import { ClientAppModule } from '../client-app/client-app.module';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -21,6 +22,7 @@ describe('AuthController', () => {
         EventEmitterModule.forRoot(),
         CustomerModule,
         DevelopersModule,
+        ClientAppModule,
         JwtModule,
       ],
       controllers: [AuthController],

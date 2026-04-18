@@ -2,9 +2,9 @@
   "rest-client.environmentVariables": {
     "$shared": {},
     "dev": {
-      "baseUrl": "http://localhost:3000",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZXZlbG9wZXItNjdiOTE3MDhiYTllYTE3NGRjNjY3MTgzIiwiaWF0IjoxNzQxNjIxNzM4LCJleHAiOjE3NDE2MjUzMzh9.Yktjbcd8vV5ACVxfK6QU3g5HaMp2QnNsl0s_Spoq-CU",
-      "csrfToken": "67cf09ea769101b2b7e40c8b",
+      "baseUrl": "http://localhost:3001",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZXZlbG9wZXItNjdiOTE3MDhiYTllYTE3NGRjNjY3MTgzIiwiaWF0IjoxNzQ1OTI4Njc0LCJleHAiOjE3NDU5MzIyNzR9.mjz8fFrTFXTY02TrCv7z6db3jAYqxUDHxurEmxDDYcs",
+      "csrfToken": "6810c1e2e211beae68c4e00e",
     },
     "staging": {
       "baseUrl": "",
